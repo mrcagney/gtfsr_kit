@@ -1,8 +1,12 @@
-GTFSRTK
+GTFSrTK
 ********
-A Python 3.4+ project to process General Transit Feed Specification Realtime data.
+A Python 3.4+ toolkit to process General Transit Feed Specification Realtime (GTFSr) data.
 Uses Pandas to do the heavy lifting.
-In progress.
+
+
+Notes
+======
+- Development status is Alpha
 
 
 Authors

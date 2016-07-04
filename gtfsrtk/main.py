@@ -94,7 +94,7 @@ def extract_delays(feed, timestamp_format=ut.TIMESTAMP_FORMAT):
     2. The timestamp of the update, which is a string of the given
       format
 
-    If the feed has no trip updates, then data frame will be empty.
+    If the feed has no trip updates, then the data frame will be empty.
     """
     t = get_timestamp(feed, timestamp_format)
     rows = []
@@ -127,7 +127,7 @@ def extract_delays(feed, timestamp_format=ut.TIMESTAMP_FORMAT):
 def combine_delays(delays_list):
     """
     Given a list of delay data frames from roughly the same date
-    (each the output of :func:`extract_delays`)
+    (each the output of :func:`extract_delays`),
     combine them into a single data frame 
     and remove duplicate [route_id, trip_id, stop_sequence]
     entries by combining their non-null delay values
@@ -175,9 +175,10 @@ def clean_delays(delays, delay_cutoff=3600):
     1. Create a ``'delay'`` column that equals a trip's departure delay
       except at the final stop, in which case it equals the trip's 
       arrival delay.
-    2. Drop the ``'departure_delay'`` and ``'arrival_delay'`` columns.
-    3. Nullify fishy delays, that is, ones of at least ``delay_cutoff``
-      seconds.
+    2. Nullify fishy delays in the ``'delay'`` column, that is, 
+      delays of at least ``delay_cutoff`` seconds in absolute value.
+    3. (Optional) Interpolate the ``'delay'`` column values using
+      :func:`interpolate_delays`
     """
     f = delays.copy()
         
@@ -189,28 +190,26 @@ def clean_delays(delays, delay_cutoff=3600):
     f['delay'] = f['departure_delay'].copy()
     f = f.groupby('trip_id').apply(last_delay)
     
-    # Drop other delay columns
-    f = f.drop(['arrival_delay', 'departure_delay'], axis=1)
-
     # Nullify fishy delays
     cond = abs(f['delay']) >= delay_cutoff
     f.loc[cond, 'delay'] = np.nan
         
     return f
 
-def interpolate_delays(augmented_stop_times, delay_col, dist_threshold, num_decimals=0):
+def interpolate_delays(augmented_stop_times, delay_col, dist_threshold,
+  num_decimals=0):
     """
-    Given a data frame of GTFS stop times with an accurate ``'shape_dist_traveled'``
-    column and extra column ``delay_col`` of trip delays,
-    interpolate the delays of each trip as follows.
-    If a trip has all null delays, then leave them as is.
+    Given a data frame of GTFS stop times with an accurate
+     ``'shape_dist_traveled'``column and an extra column ``delay_col`` 
+    of trip delays, interpolate the delays of each trip as follows.
+    If a trip has all null delays, then leave them as they are.
     Otherwise:
 
-    - If the first delay is more than ``dist_threshold`` distance units from the 
-      first stop, then set the first stop delay to zero; otherwise
+    - If the first delay is more than ``dist_threshold`` distance units 
+      from the first stop, then set the first stop delay to zero; otherwise
       set the first stop delay to the first delay.
-    - If the last delay is more than ``dist_threshold`` distance units from the 
-      last stop, then set the last stop delay to zero; otherwise 
+    - If the last delay is more than ``dist_threshold`` distance units from 
+      the last stop, then set the last stop delay to zero; otherwise 
       set the last stop delay to the last delay.
     - Linearly interpolate the remaining stop delays by distance.
     
@@ -218,7 +217,11 @@ def interpolate_delays(augmented_stop_times, delay_col, dist_threshold, num_deci
     Return the resulting data frame.
     """
     f = augmented_stop_times.copy()
+
+    # Check if there's anything to do.
     if delay_col not in f.columns:
+        return f
+    if f[delay_col].count() == f[delay_col].shape[0]:
         return f
 
     def fill(group):
@@ -245,6 +248,7 @@ def interpolate_delays(augmented_stop_times, delay_col, dist_threshold, num_deci
         return group 
     
     f = f.groupby('trip_id').apply(fill)
+
     # Round
     if num_decimals is not None:
         f[delay_col] = f[delay_col].round(num_decimals)
