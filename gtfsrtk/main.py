@@ -73,10 +73,15 @@ def collect_feeds(get_feed, frequency, duration, out_dir, num_tries=3,
 def get_timestamp(feed, timestamp_format=ut.TIMESTAMP_FORMAT):
     """
     Given a GTFSr feed, return its timestamp in the given format.
+    If the feed is empty or ``None``, return ``None``.
     """
-    return ut.timestamp_to_str(
-      feed['response']['header']['timestamp'], 
-      timestamp_format)
+    if not feed:
+        result = None
+    else:
+        result = ut.timestamp_to_str(
+          feed['response']['header']['timestamp'], 
+          timestamp_format)
+    return result 
 
 def extract_delays(feed, timestamp_format=ut.TIMESTAMP_FORMAT):
     """
@@ -97,23 +102,26 @@ def extract_delays(feed, timestamp_format=ut.TIMESTAMP_FORMAT):
     """
     t = get_timestamp(feed, timestamp_format)
     rows = []
-    for e in feed['response']['entity']:
-        if 'trip_update' not in e:
-            continue
-        tu = e['trip_update']
-        rid = tu['trip']['route_id']
-        tid = tu['trip']['trip_id']
-        stu = tu['stop_time_update']
-        stop_sequence = int(stu['stop_sequence'])
-        stop_id = str(stu['stop_id'])
-        delay = {}
-        for key in ['arrival', 'departure']:
-            if key in stu:
-                delay[key] = stu[key]['delay']
-            else:
-                delay[key] = np.nan
-        rows.append((rid, tid, stop_sequence, stop_id, 
-          delay['arrival'], delay['departure']))
+    try:
+        for e in feed['response']['entity']:
+            if 'trip_update' not in e:
+                continue
+            tu = e['trip_update']
+            rid = tu['trip']['route_id']
+            tid = tu['trip']['trip_id']
+            stu = tu['stop_time_update']
+            stop_sequence = int(stu['stop_sequence'])
+            stop_id = str(stu['stop_id'])
+            delay = {}
+            for key in ['arrival', 'departure']:
+                if key in stu:
+                    delay[key] = stu[key]['delay']
+                else:
+                    delay[key] = np.nan
+            rows.append((rid, tid, stop_sequence, stop_id, 
+              delay['arrival'], delay['departure']))
+    except (TypeError, KeyError):
+        pass
 
     f = pd.DataFrame(rows, columns=[
       'route_id', 'trip_id', 'stop_sequence', 'stop_id',
