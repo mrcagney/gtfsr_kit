@@ -74,7 +74,7 @@ def get_timestamp(feed, timestamp_format=ut.TIMESTAMP_FORMAT):
     """
     Given a GTFSr feed, return its timestamp in the given format.
     """
-    return ut.format_timestamp(
+    return ut.timestamp_to_str(
       feed['response']['header']['timestamp'], 
       timestamp_format)
 
@@ -163,12 +163,33 @@ def combine_delays(delays_list):
     return f
 
 @ut.time_it
-def create_augmented_stop_times(gtfsr_path, gtfs_feed, date):
+def build_augmented_stop_times(gtfsr_path, gtfs_feed, date, 
+  timestamp_format=ut.TIMESTAMP_FORMAT):
     """
-    Given the path to a directory that contains GTFSr feeds...
+    INPUTS:
 
-    TODO: Add support for different time stamp formats.
+    - ``gtfsr_path``: string or Path object; path to a directory that 
+      contains GTFSr trip update feeds named <feed time stamp formatted>.json, 
+      where the feed time stamp is formatted according to format
+      ``timestamp_format``
+    - ``gtfs_feed``: GTFSTK Feed instance corresponding to the GTFSr feeds 
+    - ``date``: YYYYMMDD string
+    - ``timestamp_format``: string or ``None``
+
+    OUTPUT:
+
+    - A data frame of GTFS stop times for trips scheduled on the given date 
+      and containing two extra columns, ``'arrival_delay'`` and 
+      ``'departure_delay'``, which are delay values in seconds 
+      for that stop time according to the GTFSr feeds.  
+
     """
+    gtfsr_path = Path(gtfsr_path)
+    
+    if not gtfsr_path.exists():
+        raise ValueError('The GTFSr path {!s} does not exist'.format(
+          gtfsr_path))
+
     # Get scheduled stop times for date
     st = gt.get_stop_times(gtfs_feed, date)
     
@@ -188,7 +209,9 @@ def create_augmented_stop_times(gtfsr_path, gtfs_feed, date):
     # Extract delays
     delays_frames = []
     for f in gtfsr_path.iterdir():
-        datetime = f.stem
+        timestamp = ut.timestamp_to_str(f.stem, format=timestamp_format,
+          inverse=True)
+        datetime = ut.timestamp_to_str(timestamp, ut.TIMESTAMP_FORMAT) 
         if start_datetime <= datetime <= end_datetime:  
             with f.open() as src:
                 tu = json.load(src)
@@ -199,13 +222,30 @@ def create_augmented_stop_times(gtfsr_path, gtfs_feed, date):
     del delays['route_id']
 
     # Merge with stop times    
-    f = st.merge(delays, how='left', 
+    ast = st.merge(delays, how='left', 
       on=['trip_id', 'stop_id', 'stop_sequence'])
   
-    return f.sort_values(['trip_id', 'stop_sequence'])
+    return ast.sort_values(['trip_id', 'stop_sequence'])
 
 def clean_augmented_stop_times(augmented_stop_times, dist_threshold):
     """
+    INPUTS:
+
+    - ``augmented_stop_times``: data frame; same format as output of  
+      :func:`build_augmented_stop_times`
+    - ``dist_threshold``: float; represents a distance in the same units
+      as the ``'shape_dist_traveled'`` column of ``augmented_stop_times``,
+      if that column is present
+
+    OUTPUT:
+
+    - The data frame ``augmented_stop_times`` altered as follows.
+      Append a ``'delay'`` column using :func:`append_delay_col`.
+      Drop the columns ``'arrival_delay'`` and ``'departure_delay'``.
+      Interpolate values in the ``'delay'`` column according to 
+      :func:`interpolate_delays` if a ``'shape_dist_traveled'`` column 
+      is present and has at least one non-null value.
+
     """
     f = augmented_stop_times.copy()
     f = append_delay_col(f)

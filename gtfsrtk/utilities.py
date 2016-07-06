@@ -37,10 +37,23 @@ def get_secret(secret, secrets_path=SECRETS_PATH):
     except KeyError:
         raise ValueError("Set the {0} secrets variable".format(secret))
 
-def format_timestamp(t, format_str=TIMESTAMP_FORMAT):
+def timestamp_to_str(t, format=TIMESTAMP_FORMAT, inverse=False):
     """
-    Given a POSIX timestamp (float), format it as a string
-    in the given format
+    Given a POSIX timestamp (float) ``t``, format it as a string
+    in the given format.
+    If ``inverse``, then do the inverse, that is, assume ``t`` is 
+    a string in the given format and return its corresponding timestamp.
+    If ``format is None``, then cast ``t`` as a float (if not ``inverse``)
+    or string (if ``inverse``) directly.
     """
-    t = dt.datetime.fromtimestamp(t)
-    return dt.datetime.strftime(t, format_str)
+    if not inverse:
+        if format is None:
+            result = str(t)
+        else:
+            result = dt.datetime.fromtimestamp(t).strftime(format)
+    else:
+        if format is None:
+            result = float(t)
+        else:
+            result = dt.datetime.strptime(t, format).timestamp()
+    return result
