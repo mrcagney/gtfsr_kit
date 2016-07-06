@@ -5,7 +5,7 @@ decorator==4.0.9
 entrypoints==0.2
 future==0.15.2
 gnureadline==6.3.3
-gtfstk==4.2.0
+gtfstk==4.3.0
 ipykernel==4.3.1
 ipython==4.2.0
 ipython-genutils==0.1.0

@@ -1,9 +1,7 @@
 """
-This module does most of the work.
-
 CONVENTIONS
 ============
-- Unless specified otherwise, assume all GTFSr feeds are in the form of decoded JSON objects (Python dictionaries)
+- Unless specified otherwise, assume all GTFSr feeds are in the form of Python dictionaries decoded from JSON objects
 """
 import json
 import time
@@ -12,6 +10,7 @@ from pathlib import Path
 import requests
 import pandas as pd
 import numpy as np
+import gtfstk as gt 
 
 import gtfsrtk.utilities as ut
 
@@ -123,7 +122,6 @@ def extract_delays(feed, timestamp_format=ut.TIMESTAMP_FORMAT):
     f.index = range(f.shape[0])
     return f, t
 
-#@ut.time_it
 def combine_delays(delays_list):
     """
     Given a list of delay data frames from roughly the same date
@@ -164,23 +162,79 @@ def combine_delays(delays_list):
     f = pd.DataFrame(new_rows, index=range(len(new_rows)))
     return f
 
-def clean_delays(delays, delay_cutoff=3600):
+@ut.time_it
+def create_augmented_stop_times(gtfsr_path, gtfs_feed, date):
     """
-    Given a delays data frame (output of :func:`extract_delays` or 
-    :func:`combine_delays`),
-    clean up the delays some and return the resulting data frame.
+    Given the path to a directory that contains GTFSr feeds...
 
-    Cleaning involves the following.
-
-    1. Create a ``'delay'`` column that equals a trip's departure delay
-      except at the final stop, in which case it equals the trip's 
-      arrival delay.
-    2. Nullify fishy delays in the ``'delay'`` column, that is, 
-      delays of at least ``delay_cutoff`` seconds in absolute value.
-    3. (Optional) Interpolate the ``'delay'`` column values using
-      :func:`interpolate_delays`
+    TODO: Add support for different time stamp formats.
     """
-    f = delays.copy()
+    # Get scheduled stop times for date
+    st = gt.get_stop_times(gtfs_feed, date)
+    
+    # Get appropriate set of trip updates based on scheduled stop times
+    start_time = '000000'
+    start_datetime = date + start_time
+    end_time = gt.timestr_to_seconds(st['departure_time'].max()) + 20*60 # Plus 20 minutes fuzz
+    if end_time >= 24*3600:
+        end_date = str(int(date) + 1)
+    else:
+        end_date = date
+    end_time = gt.timestr_to_seconds(end_time, inverse=True)
+    end_time = gt.timestr_mod24(end_time)
+    end_time = end_time.replace(':', '')
+    end_datetime = end_date + end_time
+    
+    # Extract delays
+    delays_frames = []
+    for f in gtfsr_path.iterdir():
+        datetime = f.stem
+        if start_datetime <= datetime <= end_datetime:  
+            with f.open() as src:
+                tu = json.load(src)
+                delays_frames.append(extract_delays(tu)[0])
+
+    # Combine delays
+    delays = combine_delays(delays_frames)     
+    del delays['route_id']
+
+    # Merge with stop times    
+    f = st.merge(delays, how='left', 
+      on=['trip_id', 'stop_id', 'stop_sequence'])
+  
+    return f.sort_values(['trip_id', 'stop_sequence'])
+
+def clean_augmented_stop_times(augmented_stop_times, dist_threshold):
+    """
+    """
+    f = augmented_stop_times.copy()
+    f = append_delay_col(f)
+    f = f.drop(['arrival_delay', 'departure_delay'], axis=1)
+
+    if 'shape_dist_traveled' in f.columns and\
+      f['shape_dist_traveled'].notnull().any():
+        f = interpolate_delays(f, delay_col='delay', 
+          dist_threshold=dist_threshold)
+    
+    return f
+
+def append_delay_col(f, delay_cutoff=3600):
+    """
+    Given a data frame ``f`` with at least the columns:
+
+    - ``'trip_id'``
+    - ``'stop_sequence'``
+    - ``'arrival_delay'``: in seconds
+    - ``'departure_delay'``: in seconds
+
+    append to it a ``'delay'`` column that 
+    equals a trip's departure delay except at the final stop, 
+    in which case it equals the trip's arrival delay.
+    Then nullify fishy delays in the ``'delay'`` column, that is, 
+    delays of at least ``delay_cutoff`` seconds in absolute value.
+    Return the resulting data frame.
+    """
+    f = f.copy()
         
     # Create a delay column
     def last_delay(group):
@@ -225,7 +279,7 @@ def interpolate_delays(augmented_stop_times, delay_col, dist_threshold,
         return f
 
     def fill(group):
-        # Don't fill trip with all null delays
+        # Don't fill trip that has all null delays
         if group[delay_col].count() == 0:
             return group
 
@@ -254,3 +308,8 @@ def interpolate_delays(augmented_stop_times, delay_col, dist_threshold,
         f[delay_col] = f[delay_col].round(num_decimals)
         
     return f
+
+def compute_routes_stats(gtfs_feed, augmented_stop_times):
+    """
+    """
+    pass
