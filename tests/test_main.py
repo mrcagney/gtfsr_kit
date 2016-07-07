@@ -12,12 +12,12 @@ from gtfsrtk.utilities import *
 from gtfsrtk.main import *
 
 
-# Get a test feed
+# Load some feeds
 DATA_DIR = Path('data')
-FEED_PATH = DATA_DIR/'auckland_gtfsr_trip_updates'/'20160520235543.json'
-with FEED_PATH.open() as src:
-    FEED = json.load(src)
-
+FEEDS = []
+for path in (DATA_DIR/'test_gtfsr_trip_updates').iterdir():
+    with path.open() as src:
+        FEEDS.append(json.load(src))
 
 class TestMain(unittest.TestCase):
 
@@ -26,29 +26,67 @@ class TestMain(unittest.TestCase):
         # Should be a function
         self.assertIsInstance(f, FunctionType)
 
-
     def test_get_timestamp(self):
-        # Timestamp should match feed name
-        t = get_timestamp(FEED)
-        expect = FEED_PATH.stem
-        self.assertEqual(t, expect)
-
         # Null feed should yield None
         self.assertEqual(get_timestamp(None), None)
+        # Timestamp should be a string
+        self.assertIsInstance(get_timestamp(FEEDS[0]), str)
 
     def test_extract_delays(self):
-        for feed in [FEED, None]:
-            delays, t = extract_delays(feed)
-            # Types should be correct
+        for feed in [None, FEEDS[0]]:
+            delays = extract_delays(feed)
+            # Should be a data frame
             self.assertIsInstance(delays, pd.DataFrame)
-            if feed is None:
-                self.assertEqual(t, None)
-            else:
-                self.assertIsInstance(t, str)
-            # delays should have the correct columns
+            # Should have the correct columns
             expect_cols = ['route_id', 'trip_id', 'stop_id',
               'stop_sequence', 'arrival_delay', 'departure_delay']
             self.assertEqual(set(delays.columns), set(expect_cols))
+
+    def test_combine_delays(self):
+        delays_list = [extract_delays(f) for f in FEEDS]
+        f = combine_delays(delays_list)
+        # Should be a data frame
+        self.assertIsInstance(f, pd.DataFrame)
+        # Should have the correct columns
+        expect_cols = ['route_id', 'trip_id', 'stop_id',
+          'stop_sequence', 'arrival_delay', 'departure_delay']
+        self.assertEqual(set(f.columns), set(expect_cols))
+
+    def test_build_augmented_stop_times(self):
+        gtfsr_dir = DATA_DIR/'test_gtfsr_trip_updates'
+        path = DATA_DIR/'auckland_gtfs_20160519.zip'
+        gtfs_feed = gt.read_gtfs(path, dist_units_in='km')
+        date = '20160519'
+        f = build_augmented_stop_times(gtfsr_dir, gtfs_feed, date)
+        # Should be a data frame
+        self.assertIsInstance(f, pd.DataFrame)
+        # Should have the correct columns
+        st = gt.get_stop_times(gtfs_feed, date)
+        expect_cols = st.columns.tolist() + ['arrival_delay', 
+          'departure_delay']
+        self.assertEqual(set(f.columns), set(expect_cols))
+        # Should have the correct number of rows
+        self.assertEqual(f.shape[0], st.shape[0])
+
+    def test_interpolate_delays(self):
+        gtfsr_dir = DATA_DIR/'test_gtfsr_trip_updates'
+        path = DATA_DIR/'auckland_gtfs_20160519.zip'
+        gtfs_feed = gt.read_gtfs(path, dist_units_in='km')
+        date = '20160519'
+        ast = build_augmented_stop_times(gtfsr_dir, gtfs_feed, date)
+        f = interpolate_delays(ast, dist_threshold=1)
+        # Should be a data frame
+        self.assertIsInstance(f, pd.DataFrame)
+        # Should have the correct columns
+        self.assertEqual(set(f.columns), set(ast.columns))
+        # Should have the correct number of rows
+        self.assertEqual(f.shape[0], ast.shape[0])
+        # For each trip, delays should be all nan or filled
+        for __, group in f.groupby('trip_id'):
+            n = group.shape[0]
+            for col in ['arrival_delay', 'departure_delay']:
+                k = group[col].count()
+                self.assertTrue(k == 0 or k == n)
 
 
 if __name__ == '__main__':

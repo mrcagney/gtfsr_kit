@@ -1,7 +1,7 @@
 """
 CONVENTIONS
 ============
-- Unless specified otherwise, assume all GTFSr feeds are in the form of Python dictionaries decoded from JSON objects
+- Unless specified otherwise, assume all GTFSr feeds are in the form of Python dictionaries
 """
 import json
 import time
@@ -17,9 +17,16 @@ import gtfsrtk.utilities as ut
 
 def build_get_feed(url, headers, params):
     """
-    Return a function that issues a GET request to the given 
-    URL (string) with the given headers and parameters (dictionaries).
+    INPUTS:
 
+    - ``url``: URL string
+    - ``headers``: dictionary
+    - ``params``: dictionary
+
+    OUTPUTS:
+
+    A function that issues a GET request to the given 
+    URL with the given headers and parameters.
     Intended to be used to build a function that gets GTFSr feeds in 
     the form of decoded JSON objects.
     """
@@ -32,18 +39,27 @@ def build_get_feed(url, headers, params):
 def collect_feeds(get_feed, frequency, duration, out_dir, num_tries=3, 
   timestamp_format=ut.TIMESTAMP_FORMAT):
     """
-    Assume the given function ``get_feed``, e.g. an output of 
-    :func:`build_get_feed`, gets a GTFSr feed.
-    Execute this function every ``frequency`` seconds for 
+    INPUTS:
+
+    - ``get_feed``: a function that gets GTFSr feeds, e.g. an output of 
+      :func:`build_get_feed`
+    - ``frequency``: integer
+    - ``duration``: integer
+    - ``out_dir``: string or Path object
+    - ``num_tries``: integer
+    - ``timestamp_format``: string; specifies how to format timestamps 
+
+    OUTPUTS:
+
+    A collection of GTFSr feeds obtained as follows.
+    Execute ``get_feed`` every ``frequency`` seconds for 
     a duration of ``duration`` seconds and store the resulting files as JSON 
     in the directory at ``out_dir``.
     Each file will be named '<timestamp>.json' where <timestamp>
     is the timestamp of the feed object retrieved, formatted 
     via the format string ``timestamp_format``.
-
     Try at most ``num_tries`` times in a row to get each trip updates object,
     and write nothing if that fails.
-
     The number of resulting trip updates will be at most 
     ``duration//frequency``.
     """
@@ -72,7 +88,14 @@ def collect_feeds(get_feed, frequency, duration, out_dir, num_tries=3,
 
 def get_timestamp(feed, timestamp_format=ut.TIMESTAMP_FORMAT):
     """
-    Given a GTFSr feed, return its timestamp in the given format.
+    INPUTS:
+
+    - ``feed``: GTFSr feed
+    - ``timestamp_format``: string; specifies how to format timestamps 
+
+    OUTPUTS:
+
+    The timestamp of the feed formatted according to ``timestamp_format``.
     If the feed is empty or ``None``, return ``None``.
     """
     if not feed:
@@ -85,22 +108,24 @@ def get_timestamp(feed, timestamp_format=ut.TIMESTAMP_FORMAT):
 
 def extract_delays(feed, timestamp_format=ut.TIMESTAMP_FORMAT):
     """
-    Given a GTFSr feed, extract delay data from its trip updates
-    and return two things:
+    INPUTS:
 
-    1. A Pandas data frame with the columns:
-        - route_id
-        - trip_id
-        - stop_id
-        - stop_sequence
-        - arrival_delay
-        - departure_delay
-    2. The timestamp of the update, which is a string of the given
-      format
+    - ``feed``: GTFSr feed
+    - ``timestamp_format``: string; specifies how to format timestamps 
+
+    OUTPUTS:
+
+    A Pandas data frame built from the feed with the columns:
+
+    - route_id
+    - trip_id
+    - stop_id
+    - stop_sequence
+    - arrival_delay
+    - departure_delay
 
     If the feed has no trip updates, then the data frame will be empty.
     """
-    t = get_timestamp(feed, timestamp_format)
     rows = []
     try:
         for e in feed['response']['entity']:
@@ -128,17 +153,25 @@ def extract_delays(feed, timestamp_format=ut.TIMESTAMP_FORMAT):
       'arrival_delay', 'departure_delay'])
     f = f.sort_values(['route_id', 'trip_id', 'stop_sequence'])
     f.index = range(f.shape[0])
-    return f, t
+    return f
 
 def combine_delays(delays_list):
     """
-    Given a list of delay data frames from roughly the same date
-    (each the output of :func:`extract_delays`),
-    combine them into a single data frame 
-    and remove duplicate [route_id, trip_id, stop_sequence]
+    INPUTS:
+
+    - ``delays_list``: nonempty list of delay data frames, each of the form 
+      output by :func:`extract_delays`
+
+    OUTPUTS:
+
+    A data frame of the same format as each data frame in ``delays_list``
+    obtained as follows
+    Concatenate ``delays_list`` and remove duplicate 
+    [route_id, trip_id, stop_sequence]
     entries by combining their non-null delay values
     into one entry.
-    Return the resulting data frame.
+    Warning: for a sensible output, don't include in ``delays_list`` the 
+    same trips on different days.
     """
     f = pd.concat(delays_list)
     f = f.drop_duplicates()
@@ -223,7 +256,7 @@ def build_augmented_stop_times(gtfsr_path, gtfs_feed, date,
         if start_datetime <= datetime <= end_datetime:  
             with f.open() as src:
                 tu = json.load(src)
-                delays_frames.append(extract_delays(tu)[0])
+                delays_frames.append(extract_delays(tu))
 
     # Combine delays
     delays = combine_delays(delays_frames)     
@@ -235,7 +268,6 @@ def build_augmented_stop_times(gtfsr_path, gtfs_feed, date,
   
     return ast.sort_values(['trip_id', 'stop_sequence'])
 
-# TODO: Harmonize arrival and departure delays?
 @ut.time_it
 def interpolate_delays(augmented_stop_times, dist_threshold, 
   delay_threshold=3600):
@@ -313,38 +345,3 @@ def interpolate_delays(augmented_stop_times, dist_threshold,
     f[delay_cols] = f[delay_cols].round(0)
         
     return f
-
-def compute_trips_stats(gtfs_feed, augmented_stop_times):
-    """
-    """
-    pass
-
-def compute_routes_stats(gtfs_feed, augmented_stop_times):
-    """
-    INPUTS: 
-
-    - ``gtfs_feed``: GTFSTK Feed instance
-    - ``augmented_stop_times``: data frame; an output of 
-      :func:`clean_augmented_stop_times` for some date; 
-      corresponds to ``gtfs_feed``
-
-    OUTPUTS:
-
-    - A data frame with the columns
-        * ``'route_id'`` 
-        * ``'route_short_name'``
-        * ``'route_type'``
-        * ``'stop_delay_median'``
-        * ``'stop_delay_iqr'``
-        * ``'duration_delay_median'``
-        * ``'duration_delay_iqr'``
-
-    """
-    feed = gtfs_feed
-    ast = augmented_stop_times.copy()
-    f = ast.merge(feed.trips['route_id', 'trip_id'])
-
-    def stats(group):
-        pass
-
-    return f.groupby('route_id').apply(stats).reset_index()
