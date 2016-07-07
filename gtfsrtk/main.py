@@ -237,16 +237,17 @@ def build_augmented_stop_times(gtfsr_path, gtfs_feed, date,
 
 # TODO: Harmonize arrival and departure delays?
 @ut.time_it
-def fill_null_delays(augmented_stop_times, dist_threshold, 
+def interpolate_delays(augmented_stop_times, dist_threshold, 
   delay_threshold=3600):
     """
     INPUTS:
 
     - ``augmented_stop_times``: data frame; same format as output of  
       :func:`build_augmented_stop_times`
-    - ``dist_threshold``: float; represents a distance in the same units
+    - ``dist_threshold``: float; a distance in the same units
       as the ``'shape_dist_traveled'`` column of ``augmented_stop_times``,
       if that column is present
+    - ``delay_threshold``: integer; number of seconds
 
     OUTPUT:
 
@@ -265,13 +266,14 @@ def fill_null_delays(augmented_stop_times, dist_threshold,
       set the last stop delay to the last delay.
     - Linearly interpolate the remaining stop delays by distance.
     
-    The distance unit is the one used in the ``'shape_dist_traveled'`` column.
     """
     f = augmented_stop_times.copy()
 
-    # Return f if all the delays are present
+    # Return f if nothing to do
     delay_cols = ['arrival_delay', 'departure_delay']
-    if all([f[col].count() == f[col].shape[0] for col in delay_cols]):
+    if 'shape_dist_traveled' not in f.columns or\
+      not f['shape_dist_traveled'].notnull().any() or\
+      all([f[col].count() == f[col].shape[0] for col in delay_cols]):
         return f
 
     # Nullify fishy delays
@@ -303,12 +305,12 @@ def fill_null_delays(augmented_stop_times, dist_threshold,
               group.iloc[ind]['shape_dist_traveled'], 
               group.iloc[ind][col])
 
-            # Cast as int
-            group[col] = group[col].astype(int)
-
         return group 
     
     f = f.groupby('trip_id').apply(fill)
+
+    # Round
+    f[delay_cols] = f[delay_cols].round(0)
         
     return f
 
