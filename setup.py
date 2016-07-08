@@ -3,8 +3,7 @@ from distutils.core import setup
 setup(
     name='gtfsrtk',
     version='2.0.0',
-    author='Alexander Raichev',
-    author_email='alex@raichev.net',
+    author='Alex Raichev',
     packages=['gtfsrtk', 'tests'],
     url='https://github.com/araichev/gtfsrtk',
     license='LICENSE',
