@@ -1,0 +1,279 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>GTFSrTK 2.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '2.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="None" href="index.html#document-index" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="nav-item nav-item-0"><a href="index.html#document-index">GTFSrTK 2.0.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html#document-index">Table Of Contents</a></h3>
+  <ul>
+<li class="toctree-l1"><a class="reference internal" href="index.html#document-introduction">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="index.html#examples">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="index.html#conventions">Conventions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="index.html#document-modules">utilities Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="index.html#module-gtfsrtk.main">main Module</a></li>
+</ul>
+
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="gtfsrtk-version-documentation">
+<h1>GTFSrTK 2.0.0 Documentation<a class="headerlink" href="#gtfsrtk-version-documentation" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+<span id="document-introduction"></span><p>GTFSrTK is a Python 3.4+ toolkit designed to process General Transit Feed Specification Realtime (GTFSr) data.
+It uses Pandas to do the heavy lifting.</p>
+<div class="section" id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<p>Create a Python 3.4+ virtual environment and <code class="docutils literal"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">gtfsrtk</span></code></p>
+</div>
+<div class="section" id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
+<p>You can play with <code class="docutils literal"><span class="pre">ipynb/examples.ipynb</span></code> in a Jupyter notebook</p>
+</div>
+<div class="section" id="conventions">
+<h2>Conventions<a class="headerlink" href="#conventions" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Unless specified otherwise, assume all GTFSr feeds are in the form of Python dictionaries</li>
+</ul>
+</div>
+<span id="document-modules"></span><div class="section" id="module-gtfsrtk.utilities">
+<span id="utilities-module"></span><h2>utilities Module<a class="headerlink" href="#module-gtfsrtk.utilities" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="gtfsrtk.utilities.get_secret">
+<code class="descclassname">gtfsrtk.utilities.</code><code class="descname">get_secret</code><span class="sig-paren">(</span><em>secret</em>, <em>secrets_path='/home/araichev/gtfsrtk/secrets.json'</em><span class="sig-paren">)</span><a class="headerlink" href="#gtfsrtk.utilities.get_secret" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the given setting variable or return explicit exception.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="gtfsrtk.utilities.time_it">
+<code class="descclassname">gtfsrtk.utilities.</code><code class="descname">time_it</code><span class="sig-paren">(</span><em>f</em><span class="sig-paren">)</span><a class="headerlink" href="#gtfsrtk.utilities.time_it" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decorate function <code class="docutils literal"><span class="pre">f</span></code> to measure and print elapsed time when executed.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="gtfsrtk.utilities.timestamp_to_str">
+<code class="descclassname">gtfsrtk.utilities.</code><code class="descname">timestamp_to_str</code><span class="sig-paren">(</span><em>t</em>, <em>format='%Y%m%d%H%M%S'</em>, <em>inverse=False</em><span class="sig-paren">)</span><a class="headerlink" href="#gtfsrtk.utilities.timestamp_to_str" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a POSIX timestamp (float) <code class="docutils literal"><span class="pre">t</span></code>, format it as a string
+in the given format.
+If <code class="docutils literal"><span class="pre">inverse</span></code>, then do the inverse, that is, assume <code class="docutils literal"><span class="pre">t</span></code> is 
+a string in the given format and return its corresponding timestamp.
+If <code class="docutils literal"><span class="pre">format</span> <span class="pre">is</span> <span class="pre">None</span></code>, then cast <code class="docutils literal"><span class="pre">t</span></code> as a float (if not <code class="docutils literal"><span class="pre">inverse</span></code>)
+or string (if <code class="docutils literal"><span class="pre">inverse</span></code>) directly.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-gtfsrtk.main">
+<span id="main-module"></span><h2>main Module<a class="headerlink" href="#module-gtfsrtk.main" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="gtfsrtk.main.build_augmented_stop_times">
+<code class="descclassname">gtfsrtk.main.</code><code class="descname">build_augmented_stop_times</code><span class="sig-paren">(</span><em>gtfsr_path</em>, <em>gtfs_feed</em>, <em>date</em>, <em>timestamp_format='%Y%m%d%H%M%S'</em><span class="sig-paren">)</span><a class="headerlink" href="#gtfsrtk.main.build_augmented_stop_times" title="Permalink to this definition">¶</a></dt>
+<dd><p>INPUTS:</p>
+<ul class="simple">
+<li><code class="docutils literal"><span class="pre">gtfsr_path</span></code>: string or Path object; path to a directory that 
+contains GTFSr trip update feeds named &lt;feed time stamp formatted&gt;.json, 
+where the feed time stamp is formatted according to format
+<code class="docutils literal"><span class="pre">timestamp_format</span></code></li>
+<li><code class="docutils literal"><span class="pre">gtfs_feed</span></code>: GTFSTK Feed instance corresponding to the GTFSr feeds</li>
+<li><code class="docutils literal"><span class="pre">date</span></code>: YYYYMMDD string</li>
+<li><code class="docutils literal"><span class="pre">timestamp_format</span></code>: string or <code class="docutils literal"><span class="pre">None</span></code></li>
+</ul>
+<p>OUTPUT:</p>
+<ul class="simple">
+<li>A data frame of GTFS stop times for trips scheduled on the given date 
+and containing two extra columns, <code class="docutils literal"><span class="pre">'arrival_delay'</span></code> and 
+<code class="docutils literal"><span class="pre">'departure_delay'</span></code>, which are delay values in seconds 
+for that stop time according to the GTFSr feeds.</li>
+</ul>
+</dd></dl>
+
+<dl class="function">
+<dt id="gtfsrtk.main.build_get_feed">
+<code class="descclassname">gtfsrtk.main.</code><code class="descname">build_get_feed</code><span class="sig-paren">(</span><em>url</em>, <em>headers</em>, <em>params</em><span class="sig-paren">)</span><a class="headerlink" href="#gtfsrtk.main.build_get_feed" title="Permalink to this definition">¶</a></dt>
+<dd><p>INPUTS:</p>
+<ul class="simple">
+<li><code class="docutils literal"><span class="pre">url</span></code>: URL string</li>
+<li><code class="docutils literal"><span class="pre">headers</span></code>: dictionary</li>
+<li><code class="docutils literal"><span class="pre">params</span></code>: dictionary</li>
+</ul>
+<p>OUTPUTS:</p>
+<p>A function that issues a GET request to the given 
+URL with the given headers and parameters.
+Intended to be used to build a function that gets GTFSr feeds in 
+the form of decoded JSON objects.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="gtfsrtk.main.collect_feeds">
+<code class="descclassname">gtfsrtk.main.</code><code class="descname">collect_feeds</code><span class="sig-paren">(</span><em>get_feed</em>, <em>frequency</em>, <em>duration</em>, <em>out_dir</em>, <em>num_tries=3</em>, <em>timestamp_format='%Y%m%d%H%M%S'</em><span class="sig-paren">)</span><a class="headerlink" href="#gtfsrtk.main.collect_feeds" title="Permalink to this definition">¶</a></dt>
+<dd><p>INPUTS:</p>
+<ul class="simple">
+<li><code class="docutils literal"><span class="pre">get_feed</span></code>: a function that gets GTFSr feeds, e.g. an output of 
+<a class="reference internal" href="#gtfsrtk.main.build_get_feed" title="gtfsrtk.main.build_get_feed"><code class="xref py py-func docutils literal"><span class="pre">build_get_feed()</span></code></a></li>
+<li><code class="docutils literal"><span class="pre">frequency</span></code>: integer</li>
+<li><code class="docutils literal"><span class="pre">duration</span></code>: integer</li>
+<li><code class="docutils literal"><span class="pre">out_dir</span></code>: string or Path object</li>
+<li><code class="docutils literal"><span class="pre">num_tries</span></code>: integer</li>
+<li><code class="docutils literal"><span class="pre">timestamp_format</span></code>: string; specifies how to format timestamps</li>
+</ul>
+<p>OUTPUTS:</p>
+<p>A collection of GTFSr feeds obtained as follows.
+Execute <code class="docutils literal"><span class="pre">get_feed</span></code> every <code class="docutils literal"><span class="pre">frequency</span></code> seconds for 
+a duration of <code class="docutils literal"><span class="pre">duration</span></code> seconds and store the resulting files as JSON 
+in the directory at <code class="docutils literal"><span class="pre">out_dir</span></code>.
+Each file will be named &#8216;&lt;timestamp&gt;.json&#8217; where &lt;timestamp&gt;
+is the timestamp of the feed object retrieved, formatted 
+via the format string <code class="docutils literal"><span class="pre">timestamp_format</span></code>.
+Try at most <code class="docutils literal"><span class="pre">num_tries</span></code> times in a row to get each trip updates object,
+and write nothing if that fails.
+The number of resulting trip updates will be at most 
+<code class="docutils literal"><span class="pre">duration//frequency</span></code>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="gtfsrtk.main.combine_delays">
+<code class="descclassname">gtfsrtk.main.</code><code class="descname">combine_delays</code><span class="sig-paren">(</span><em>delays_list</em><span class="sig-paren">)</span><a class="headerlink" href="#gtfsrtk.main.combine_delays" title="Permalink to this definition">¶</a></dt>
+<dd><p>INPUTS:</p>
+<ul class="simple">
+<li><code class="docutils literal"><span class="pre">delays_list</span></code>: nonempty list of delay data frames, each of the form 
+output by <a class="reference internal" href="#gtfsrtk.main.extract_delays" title="gtfsrtk.main.extract_delays"><code class="xref py py-func docutils literal"><span class="pre">extract_delays()</span></code></a></li>
+</ul>
+<p>OUTPUTS:</p>
+<p>A data frame of the same format as each data frame in <code class="docutils literal"><span class="pre">delays_list</span></code>
+obtained as follows
+Concatenate <code class="docutils literal"><span class="pre">delays_list</span></code> and remove duplicate 
+[route_id, trip_id, stop_sequence]
+entries by combining their non-null delay values
+into one entry.
+Warning: for a sensible output, don&#8217;t include in <code class="docutils literal"><span class="pre">delays_list</span></code> the 
+same trips on different days.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="gtfsrtk.main.extract_delays">
+<code class="descclassname">gtfsrtk.main.</code><code class="descname">extract_delays</code><span class="sig-paren">(</span><em>feed</em>, <em>timestamp_format='%Y%m%d%H%M%S'</em><span class="sig-paren">)</span><a class="headerlink" href="#gtfsrtk.main.extract_delays" title="Permalink to this definition">¶</a></dt>
+<dd><p>INPUTS:</p>
+<ul class="simple">
+<li><code class="docutils literal"><span class="pre">feed</span></code>: GTFSr feed</li>
+<li><code class="docutils literal"><span class="pre">timestamp_format</span></code>: string; specifies how to format timestamps</li>
+</ul>
+<p>OUTPUTS:</p>
+<p>A Pandas data frame built from the feed with the columns:</p>
+<ul class="simple">
+<li>route_id</li>
+<li>trip_id</li>
+<li>stop_id</li>
+<li>stop_sequence</li>
+<li>arrival_delay</li>
+<li>departure_delay</li>
+</ul>
+<p>If the feed has no trip updates, then the data frame will be empty.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="gtfsrtk.main.get_timestamp">
+<code class="descclassname">gtfsrtk.main.</code><code class="descname">get_timestamp</code><span class="sig-paren">(</span><em>feed</em>, <em>timestamp_format='%Y%m%d%H%M%S'</em><span class="sig-paren">)</span><a class="headerlink" href="#gtfsrtk.main.get_timestamp" title="Permalink to this definition">¶</a></dt>
+<dd><p>INPUTS:</p>
+<ul class="simple">
+<li><code class="docutils literal"><span class="pre">feed</span></code>: GTFSr feed</li>
+<li><code class="docutils literal"><span class="pre">timestamp_format</span></code>: string; specifies how to format timestamps</li>
+</ul>
+<p>OUTPUTS:</p>
+<p>The timestamp of the feed formatted according to <code class="docutils literal"><span class="pre">timestamp_format</span></code>.
+If the feed is empty or <code class="docutils literal"><span class="pre">None</span></code>, return <code class="docutils literal"><span class="pre">None</span></code>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="gtfsrtk.main.interpolate_delays">
+<code class="descclassname">gtfsrtk.main.</code><code class="descname">interpolate_delays</code><span class="sig-paren">(</span><em>augmented_stop_times</em>, <em>dist_threshold</em>, <em>delay_threshold=3600</em><span class="sig-paren">)</span><a class="headerlink" href="#gtfsrtk.main.interpolate_delays" title="Permalink to this definition">¶</a></dt>
+<dd><p>INPUTS:</p>
+<ul class="simple">
+<li><code class="docutils literal"><span class="pre">augmented_stop_times</span></code>: data frame; same format as output of  
+<a class="reference internal" href="#gtfsrtk.main.build_augmented_stop_times" title="gtfsrtk.main.build_augmented_stop_times"><code class="xref py py-func docutils literal"><span class="pre">build_augmented_stop_times()</span></code></a></li>
+<li><code class="docutils literal"><span class="pre">dist_threshold</span></code>: float; a distance in the same units
+as the <code class="docutils literal"><span class="pre">'shape_dist_traveled'</span></code> column of <code class="docutils literal"><span class="pre">augmented_stop_times</span></code>,
+if that column is present</li>
+<li><code class="docutils literal"><span class="pre">delay_threshold</span></code>: integer; number of seconds</li>
+</ul>
+<p>OUTPUT:</p>
+<p>The data frame <code class="docutils literal"><span class="pre">augmented_stop_times</span></code> with delays altered as follows.
+Drop all delays with absolute value more than <code class="docutils literal"><span class="pre">delay_threshold</span></code> seconds. 
+For each trip and for each delay type (arrival delay or departure delay)
+do the following. 
+If the trip has all null values for the delay type,
+then leave the values as is. 
+Otherwise:</p>
+<ul class="simple">
+<li>If the first delay is more than <code class="docutils literal"><span class="pre">dist_threshold</span></code> distance units 
+from the first stop, then set the first stop delay to zero; otherwise
+set the first stop delay to the first delay.</li>
+<li>If the last delay is more than <code class="docutils literal"><span class="pre">dist_threshold</span></code> distance units from 
+the last stop, then set the last stop delay to zero; otherwise 
+set the last stop delay to the last delay.</li>
+<li>Linearly interpolate the remaining stop delays by distance.</li>
+</ul>
+</dd></dl>
+
+</div>
+</div>
+</div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></li>
+<li><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></li>
+<li><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></li>
+</ul>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="nav-item nav-item-0"><a href="index.html#document-index">GTFSrTK 2.0.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2016, Alex Raichev.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.4.
+    </div>
+  </body>
+</html>

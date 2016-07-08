@@ -1,8 +1,3 @@
-"""
-CONVENTIONS
-============
-- Unless specified otherwise, assume all GTFSr feeds are in the form of Python dictionaries
-"""
 import json
 import time
 from pathlib import Path
@@ -284,12 +279,13 @@ def interpolate_delays(augmented_stop_times, dist_threshold,
     OUTPUT:
 
     The data frame ``augmented_stop_times`` with delays altered as follows.
-    Drop all delays with absolute value more than ``delay_threshold``seconds. 
+    Drop all delays with absolute value more than ``delay_threshold`` seconds. 
     For each trip and for each delay type (arrival delay or departure delay)
     do the following. 
     If the trip has all null values for the delay type,
     then leave the values as is. 
     Otherwise:
+
     - If the first delay is more than ``dist_threshold`` distance units 
       from the first stop, then set the first stop delay to zero; otherwise
       set the first stop delay to the first delay.
@@ -297,7 +293,6 @@ def interpolate_delays(augmented_stop_times, dist_threshold,
       the last stop, then set the last stop delay to zero; otherwise 
       set the last stop delay to the last delay.
     - Linearly interpolate the remaining stop delays by distance.
-    
     """
     f = augmented_stop_times.copy()
 
