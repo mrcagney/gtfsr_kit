@@ -14,8 +14,9 @@ from gtfsrtk.main import *
 
 # Load some feeds
 DATA_DIR = Path('data')
+GTFSR_DIR = DATA_DIR/'auckland_gtfsr_trip_updates'
 FEEDS = []
-for path in (DATA_DIR/'test_gtfsr_trip_updates').iterdir():
+for path in GTFSR_DIR.iterdir():
     with path.open() as src:
         FEEDS.append(json.load(src))
 
@@ -53,11 +54,10 @@ class TestMain(unittest.TestCase):
         self.assertEqual(set(f.columns), set(expect_cols))
 
     def test_build_augmented_stop_times(self):
-        gtfsr_dir = DATA_DIR/'test_gtfsr_trip_updates'
         path = DATA_DIR/'auckland_gtfs_20160519.zip'
         gtfs_feed = gt.read_gtfs(path, dist_units_in='km')
         date = '20160519'
-        f = build_augmented_stop_times(gtfsr_dir, gtfs_feed, date)
+        f = build_augmented_stop_times(GTFSR_DIR, gtfs_feed, date)
         # Should be a data frame
         self.assertIsInstance(f, pd.DataFrame)
         # Should have the correct columns
@@ -69,11 +69,10 @@ class TestMain(unittest.TestCase):
         self.assertEqual(f.shape[0], st.shape[0])
 
     def test_interpolate_delays(self):
-        gtfsr_dir = DATA_DIR/'test_gtfsr_trip_updates'
         path = DATA_DIR/'auckland_gtfs_20160519.zip'
         gtfs_feed = gt.read_gtfs(path, dist_units_in='km')
         date = '20160519'
-        ast = build_augmented_stop_times(gtfsr_dir, gtfs_feed, date)
+        ast = build_augmented_stop_times(GTFSR_DIR, gtfs_feed, date)
         f = interpolate_delays(ast, dist_threshold=1)
         # Should be a data frame
         self.assertIsInstance(f, pd.DataFrame)

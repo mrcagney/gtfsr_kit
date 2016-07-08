@@ -1,2 +1,8 @@
 secrets.json
 *__pycache__*
+dist/
+*.pyc
+.DS_Store
+tests/.ipynb_checkpoints/
+ipynb/.ipynb_checkpoints/
+MANIFEST
