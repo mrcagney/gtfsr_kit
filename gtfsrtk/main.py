@@ -198,7 +198,6 @@ def combine_delays(delays_list):
     f = pd.DataFrame(new_rows, index=range(len(new_rows)))
     return f
 
-@ut.time_it
 def build_augmented_stop_times(gtfsr_path, gtfs_feed, date, 
   timestamp_format=ut.TIMESTAMP_FORMAT):
     """
@@ -263,7 +262,6 @@ def build_augmented_stop_times(gtfsr_path, gtfs_feed, date,
   
     return ast.sort_values(['trip_id', 'stop_sequence'])
 
-@ut.time_it
 def interpolate_delays(augmented_stop_times, dist_threshold, 
   delay_threshold=3600):
     """
@@ -287,11 +285,11 @@ def interpolate_delays(augmented_stop_times, dist_threshold,
     Otherwise:
 
     - If the first delay is more than ``dist_threshold`` distance units 
-      from the first stop, then set the first stop delay to zero; otherwise
-      set the first stop delay to the first delay.
+      from the first stop, then set the first stop delay to zero (charitably);
+      otherwise set the first stop delay to the first delay.
     - If the last delay is more than ``dist_threshold`` distance units from 
-      the last stop, then set the last stop delay to zero; otherwise 
-      set the last stop delay to the last delay.
+      the last stop, then set the last stop delay to zero (charitably);
+      otherwise set the last stop delay to the last delay.
     - Linearly interpolate the remaining stop delays by distance.
     """
     f = augmented_stop_times.copy()
