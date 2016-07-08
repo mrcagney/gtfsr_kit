@@ -10,25 +10,6 @@ PROJECT_ROOT = os.path.abspath(os.path.join(
 SECRETS_PATH = os.path.join(PROJECT_ROOT, 'secrets.json')
 TIMESTAMP_FORMAT = '%Y%m%d%H%M%S'
 
-def get_secret(secret, secrets_path=SECRETS_PATH):
-    """
-    Get the given setting variable or return explicit exception.
-    """
-    with open(secrets_path) as src:
-        d = json.loads(src.read())
-    try:
-        return d[secret]
-    except KeyError:
-        raise ValueError("Set the {0} secrets variable".format(secret))
-
-def format_timestamp(t, format_str=TIMESTAMP_FORMAT):
-    """
-    Given a POSIX timestamp (float), format it as a string
-    in the given format
-    """
-    t = dt.datetime.fromtimestamp(t)
-    return dt.datetime.strftime(t, format_str)
-
 def time_it(f):
     """
     Decorate function ``f`` to measure and print elapsed time when executed.
@@ -44,3 +25,35 @@ def time_it(f):
         print(t2, '  Finished in %.2f min' % minutes)    
         return result
     return wrap
+
+def get_secret(secret, secrets_path=SECRETS_PATH):
+    """
+    Get the given setting variable or return explicit exception.
+    """
+    with open(secrets_path) as src:
+        d = json.loads(src.read())
+    try:
+        return d[secret]
+    except KeyError:
+        raise ValueError("Set the {0} secrets variable".format(secret))
+
+def timestamp_to_str(t, format=TIMESTAMP_FORMAT, inverse=False):
+    """
+    Given a POSIX timestamp (float) ``t``, format it as a string
+    in the given format.
+    If ``inverse``, then do the inverse, that is, assume ``t`` is 
+    a string in the given format and return its corresponding timestamp.
+    If ``format is None``, then cast ``t`` as a float (if not ``inverse``)
+    or string (if ``inverse``) directly.
+    """
+    if not inverse:
+        if format is None:
+            result = str(t)
+        else:
+            result = dt.datetime.fromtimestamp(t).strftime(format)
+    else:
+        if format is None:
+            result = float(t)
+        else:
+            result = dt.datetime.strptime(t, format).timestamp()
+    return result

@@ -1,10 +1,3 @@
-"""
-This module does most of the work.
-
-CONVENTIONS
-============
-- Unless specified otherwise, assume all GTFSr feeds are in the form of decoded JSON objects (Python dictionaries)
-"""
 import json
 import time
 from pathlib import Path
@@ -12,15 +5,23 @@ from pathlib import Path
 import requests
 import pandas as pd
 import numpy as np
+import gtfstk as gt 
 
 import gtfsrtk.utilities as ut
 
 
 def build_get_feed(url, headers, params):
     """
-    Return a function that issues a GET request to the given 
-    URL (string) with the given headers and parameters (dictionaries).
+    INPUTS:
 
+    - ``url``: URL string
+    - ``headers``: dictionary
+    - ``params``: dictionary
+
+    OUTPUTS:
+
+    A function that issues a GET request to the given 
+    URL with the given headers and parameters.
     Intended to be used to build a function that gets GTFSr feeds in 
     the form of decoded JSON objects.
     """
@@ -33,18 +34,27 @@ def build_get_feed(url, headers, params):
 def collect_feeds(get_feed, frequency, duration, out_dir, num_tries=3, 
   timestamp_format=ut.TIMESTAMP_FORMAT):
     """
-    Assume the given function ``get_feed``, e.g. an output of 
-    :func:`build_get_feed`, gets a GTFSr feed.
-    Execute this function every ``frequency`` seconds for 
+    INPUTS:
+
+    - ``get_feed``: a function that gets GTFSr feeds, e.g. an output of 
+      :func:`build_get_feed`
+    - ``frequency``: integer
+    - ``duration``: integer
+    - ``out_dir``: string or Path object
+    - ``num_tries``: integer
+    - ``timestamp_format``: string; specifies how to format timestamps 
+
+    OUTPUTS:
+
+    A collection of GTFSr feeds obtained as follows.
+    Execute ``get_feed`` every ``frequency`` seconds for 
     a duration of ``duration`` seconds and store the resulting files as JSON 
     in the directory at ``out_dir``.
     Each file will be named '<timestamp>.json' where <timestamp>
     is the timestamp of the feed object retrieved, formatted 
     via the format string ``timestamp_format``.
-
     Try at most ``num_tries`` times in a row to get each trip updates object,
     and write nothing if that fails.
-
     The number of resulting trip updates will be at most 
     ``duration//frequency``.
     """
@@ -73,66 +83,90 @@ def collect_feeds(get_feed, frequency, duration, out_dir, num_tries=3,
 
 def get_timestamp(feed, timestamp_format=ut.TIMESTAMP_FORMAT):
     """
-    Given a GTFSr feed, return its timestamp in the given format.
+    INPUTS:
+
+    - ``feed``: GTFSr feed
+    - ``timestamp_format``: string; specifies how to format timestamps 
+
+    OUTPUTS:
+
+    The timestamp of the feed formatted according to ``timestamp_format``.
+    If the feed is empty or ``None``, return ``None``.
     """
-    return ut.format_timestamp(
-      feed['response']['header']['timestamp'], 
-      timestamp_format)
+    if not feed:
+        result = None
+    else:
+        result = ut.timestamp_to_str(
+          feed['response']['header']['timestamp'], 
+          timestamp_format)
+    return result 
 
 def extract_delays(feed, timestamp_format=ut.TIMESTAMP_FORMAT):
     """
-    Given a GTFSr feed, extract delay data from its trip updates
-    and return two things:
+    INPUTS:
 
-    1. A Pandas data frame with the columns:
-        - route_id
-        - trip_id
-        - stop_id
-        - stop_sequence
-        - arrival_delay
-        - departure_delay
-    2. The timestamp of the update, which is a string of the given
-      format
+    - ``feed``: GTFSr feed
+    - ``timestamp_format``: string; specifies how to format timestamps 
 
-    If the feed has no trip updates, then data frame will be empty.
+    OUTPUTS:
+
+    A Pandas data frame built from the feed with the columns:
+
+    - route_id
+    - trip_id
+    - stop_id
+    - stop_sequence
+    - arrival_delay
+    - departure_delay
+
+    If the feed has no trip updates, then the data frame will be empty.
     """
-    t = get_timestamp(feed, timestamp_format)
     rows = []
-    for e in feed['response']['entity']:
-        if 'trip_update' not in e:
-            continue
-        tu = e['trip_update']
-        rid = tu['trip']['route_id']
-        tid = tu['trip']['trip_id']
-        stu = tu['stop_time_update']
-        stop_sequence = int(stu['stop_sequence'])
-        stop_id = str(stu['stop_id'])
-        delay = {}
-        for key in ['arrival', 'departure']:
-            if key in stu:
-                delay[key] = stu[key]['delay']
-            else:
-                delay[key] = np.nan
-        rows.append((rid, tid, stop_sequence, stop_id, 
-          delay['arrival'], delay['departure']))
+    try:
+        for e in feed['response']['entity']:
+            if 'trip_update' not in e:
+                continue
+            tu = e['trip_update']
+            rid = tu['trip']['route_id']
+            tid = tu['trip']['trip_id']
+            stu = tu['stop_time_update']
+            stop_sequence = int(stu['stop_sequence'])
+            stop_id = str(stu['stop_id'])
+            delay = {}
+            for key in ['arrival', 'departure']:
+                if key in stu:
+                    delay[key] = stu[key]['delay']
+                else:
+                    delay[key] = np.nan
+            rows.append((rid, tid, stop_sequence, stop_id, 
+              delay['arrival'], delay['departure']))
+    except (TypeError, KeyError):
+        pass
 
     f = pd.DataFrame(rows, columns=[
       'route_id', 'trip_id', 'stop_sequence', 'stop_id',
       'arrival_delay', 'departure_delay'])
     f = f.sort_values(['route_id', 'trip_id', 'stop_sequence'])
     f.index = range(f.shape[0])
-    return f, t
+    return f
 
-#@ut.time_it
 def combine_delays(delays_list):
     """
-    Given a list of delay data frames from roughly the same date
-    (each the output of :func:`extract_delays`)
-    combine them into a single data frame 
-    and remove duplicate [route_id, trip_id, stop_sequence]
+    INPUTS:
+
+    - ``delays_list``: nonempty list of delay data frames, each of the form 
+      output by :func:`extract_delays`
+
+    OUTPUTS:
+
+    A data frame of the same format as each data frame in ``delays_list``
+    obtained as follows
+    Concatenate ``delays_list`` and remove duplicate 
+    [route_id, trip_id, stop_sequence]
     entries by combining their non-null delay values
     into one entry.
-    Return the resulting data frame.
+    Warning: for a sensible output, don't include in ``delays_list`` the 
+    same trips on different days.
     """
     f = pd.concat(delays_list)
     f = f.drop_duplicates()
@@ -164,89 +198,145 @@ def combine_delays(delays_list):
     f = pd.DataFrame(new_rows, index=range(len(new_rows)))
     return f
 
-def clean_delays(delays, delay_cutoff=3600):
+@ut.time_it
+def build_augmented_stop_times(gtfsr_path, gtfs_feed, date, 
+  timestamp_format=ut.TIMESTAMP_FORMAT):
     """
-    Given a delays data frame (output of :func:`extract_delays` or 
-    :func:`combine_delays`),
-    clean up the delays some and return the resulting data frame.
+    INPUTS:
 
-    Cleaning involves the following.
+    - ``gtfsr_path``: string or Path object; path to a directory that 
+      contains GTFSr trip update feeds named <feed time stamp formatted>.json, 
+      where the feed time stamp is formatted according to format
+      ``timestamp_format``
+    - ``gtfs_feed``: GTFSTK Feed instance corresponding to the GTFSr feeds 
+    - ``date``: YYYYMMDD string
+    - ``timestamp_format``: string or ``None``
 
-    1. Create a ``'delay'`` column that equals a trip's departure delay
-      except at the final stop, in which case it equals the trip's 
-      arrival delay.
-    2. Drop the ``'departure_delay'`` and ``'arrival_delay'`` columns.
-    3. Nullify fishy delays, that is, ones of at least ``delay_cutoff``
-      seconds.
+    OUTPUT:
+
+    - A data frame of GTFS stop times for trips scheduled on the given date 
+      and containing two extra columns, ``'arrival_delay'`` and 
+      ``'departure_delay'``, which are delay values in seconds 
+      for that stop time according to the GTFSr feeds.  
+
     """
-    f = delays.copy()
-        
-    # Create a delay column
-    def last_delay(group):
-        group['delay'].iat[-1] = group['arrival_delay'].iat[-1]
-        return group
-
-    f['delay'] = f['departure_delay'].copy()
-    f = f.groupby('trip_id').apply(last_delay)
+    gtfsr_path = Path(gtfsr_path)
     
-    # Drop other delay columns
-    f = f.drop(['arrival_delay', 'departure_delay'], axis=1)
+    if not gtfsr_path.exists():
+        raise ValueError('The GTFSr path {!s} does not exist'.format(
+          gtfsr_path))
 
-    # Nullify fishy delays
-    cond = abs(f['delay']) >= delay_cutoff
-    f.loc[cond, 'delay'] = np.nan
-        
-    return f
+    # Get scheduled stop times for date
+    st = gt.get_stop_times(gtfs_feed, date)
+    
+    # Get appropriate set of trip updates based on scheduled stop times
+    start_time = '000000'
+    start_datetime = date + start_time
+    end_time = gt.timestr_to_seconds(st['departure_time'].max()) + 20*60 # Plus 20 minutes fuzz
+    if end_time >= 24*3600:
+        end_date = str(int(date) + 1)
+    else:
+        end_date = date
+    end_time = gt.timestr_to_seconds(end_time, inverse=True)
+    end_time = gt.timestr_mod24(end_time)
+    end_time = end_time.replace(':', '')
+    end_datetime = end_date + end_time
+    
+    # Extract delays
+    delays_frames = []
+    for f in gtfsr_path.iterdir():
+        timestamp = ut.timestamp_to_str(f.stem, format=timestamp_format,
+          inverse=True)
+        datetime = ut.timestamp_to_str(timestamp, ut.TIMESTAMP_FORMAT) 
+        if start_datetime <= datetime <= end_datetime:  
+            with f.open() as src:
+                tu = json.load(src)
+                delays_frames.append(extract_delays(tu))
 
-def interpolate_delays(augmented_stop_times, delay_col, dist_threshold, num_decimals=0):
+    # Combine delays
+    delays = combine_delays(delays_frames)     
+    del delays['route_id']
+
+    # Merge with stop times    
+    ast = st.merge(delays, how='left', 
+      on=['trip_id', 'stop_id', 'stop_sequence'])
+  
+    return ast.sort_values(['trip_id', 'stop_sequence'])
+
+@ut.time_it
+def interpolate_delays(augmented_stop_times, dist_threshold, 
+  delay_threshold=3600):
     """
-    Given a data frame of GTFS stop times with an accurate ``'shape_dist_traveled'``
-    column and extra column ``delay_col`` of trip delays,
-    interpolate the delays of each trip as follows.
-    If a trip has all null delays, then leave them as is.
+    INPUTS:
+
+    - ``augmented_stop_times``: data frame; same format as output of  
+      :func:`build_augmented_stop_times`
+    - ``dist_threshold``: float; a distance in the same units
+      as the ``'shape_dist_traveled'`` column of ``augmented_stop_times``,
+      if that column is present
+    - ``delay_threshold``: integer; number of seconds
+
+    OUTPUT:
+
+    The data frame ``augmented_stop_times`` with delays altered as follows.
+    Drop all delays with absolute value more than ``delay_threshold`` seconds. 
+    For each trip and for each delay type (arrival delay or departure delay)
+    do the following. 
+    If the trip has all null values for the delay type,
+    then leave the values as is. 
     Otherwise:
 
-    - If the first delay is more than ``dist_threshold`` distance units from the 
-      first stop, then set the first stop delay to zero; otherwise
+    - If the first delay is more than ``dist_threshold`` distance units 
+      from the first stop, then set the first stop delay to zero; otherwise
       set the first stop delay to the first delay.
-    - If the last delay is more than ``dist_threshold`` distance units from the 
-      last stop, then set the last stop delay to zero; otherwise 
+    - If the last delay is more than ``dist_threshold`` distance units from 
+      the last stop, then set the last stop delay to zero; otherwise 
       set the last stop delay to the last delay.
     - Linearly interpolate the remaining stop delays by distance.
-    
-    The distance unit is the one used in the ``'shape_dist_traveled'`` column.
-    Return the resulting data frame.
     """
     f = augmented_stop_times.copy()
-    if delay_col not in f.columns:
+
+    # Return f if nothing to do
+    delay_cols = ['arrival_delay', 'departure_delay']
+    if 'shape_dist_traveled' not in f.columns or\
+      not f['shape_dist_traveled'].notnull().any() or\
+      all([f[col].count() == f[col].shape[0] for col in delay_cols]):
         return f
 
+    # Nullify fishy delays
+    for col in delay_cols:
+        f.loc[abs(f[col]) > delay_threshold, col] = np.nan
+
+    # Fill null delays
     def fill(group):
-        # Don't fill trip with all null delays
-        if group[delay_col].count() == 0:
-            return group
+        # Only columns that have at least one nonnull value.
+        fill_cols = []
+        for col in delay_cols:
+            if group[col].count() >= 1:
+                fill_cols.append(col)
 
-        # Set first and last delays
-        for i in [0, -1]:
-            j = group[delay_col].dropna().index[i]
-            dist_diff = abs(group['shape_dist_traveled'].iat[i] -\
-              group['shape_dist_traveled'].ix[j])
-            if dist_diff > dist_threshold:
-                group[delay_col].iat[i] = 0
-            else:
-                group[delay_col].iat[i] = group[delay_col].ix[j]
+        for col in fill_cols:
+            # Set first and last delays
+            for i in [0, -1]:
+                j = group[col].dropna().index[i]
+                dist_diff = abs(group['shape_dist_traveled'].iat[i] -\
+                  group['shape_dist_traveled'].ix[j])
+                if dist_diff > dist_threshold:
+                    group[col].iat[i] = 0
+                else:
+                    group[col].iat[i] = group[col].ix[j]
 
-        # Interpolate remaining delays
-        ind = np.where(group[delay_col].notnull())[0]
-        group[delay_col] = np.interp(group['shape_dist_traveled'], 
-          group.iloc[ind]['shape_dist_traveled'], 
-          group.iloc[ind][delay_col])
+            # Interpolate remaining delays
+            ind = np.where(group[col].notnull())[0]
+            group[col] = np.interp(group['shape_dist_traveled'], 
+              group.iloc[ind]['shape_dist_traveled'], 
+              group.iloc[ind][col])
 
         return group 
     
     f = f.groupby('trip_id').apply(fill)
+
     # Round
-    if num_decimals is not None:
-        f[delay_col] = f[delay_col].round(num_decimals)
+    f[delay_cols] = f[delay_cols].round(0)
         
     return f
