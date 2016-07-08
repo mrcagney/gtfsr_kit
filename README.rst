@@ -39,6 +39,7 @@ Changelog
 ------------------
 - Changed to a small data set for tests
 - Upgraded to gtfstk==5.0.0
+- Removed ``time_it`` decorators from functions
 
 
 2.0.0, 2016-07-08
