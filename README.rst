@@ -35,11 +35,12 @@ Authors
 Changelog
 ==========
 
-?, ?
+3.0.0, 2016-07-12
 ------------------
 - Changed to a small data set for tests
 - Upgraded to gtfstk==5.0.0
 - Removed ``time_it`` decorators from functions
+- Changed signature of ``main.build_augmented_stop_times`` to be more versatile
 
 
 2.0.0, 2016-07-08
