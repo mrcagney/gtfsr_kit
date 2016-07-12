@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>GTFSrTK 2.0.0 documentation</title>
+    <title>GTFSrTK documentation</title>
     
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '2.0.0',
+        VERSION:     '',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -29,7 +29,7 @@
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
-        <li class="nav-item nav-item-0"><a href="index.html#document-index">GTFSrTK 2.0.0 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html#document-index">GTFSrTK  documentation</a> &raquo;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
@@ -52,7 +52,7 @@
           <div class="body" role="main">
             
   <div class="section" id="gtfsrtk-version-documentation">
-<h1>GTFSrTK 2.0.0 Documentation<a class="headerlink" href="#gtfsrtk-version-documentation" title="Permalink to this headline">¶</a></h1>
+<h1>GTFSrTK 3.0 Documentation<a class="headerlink" href="#gtfsrtk-version-documentation" title="Permalink to this headline">¶</a></h1>
 <div class="toctree-wrapper compound">
 <span id="document-introduction"></span><p>GTFSrTK is a Python 3.4+ toolkit designed to process General Transit Feed Specification Realtime (GTFSr) data.
 It uses Pandas to do the heavy lifting.</p>
@@ -100,13 +100,10 @@ or string (if <code class="docutils literal"><span class="pre">inverse</span></c
 <span id="main-module"></span><h2>main Module<a class="headerlink" href="#module-gtfsrtk.main" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="gtfsrtk.main.build_augmented_stop_times">
-<code class="descclassname">gtfsrtk.main.</code><code class="descname">build_augmented_stop_times</code><span class="sig-paren">(</span><em>gtfsr_path</em>, <em>gtfs_feed</em>, <em>date</em>, <em>timestamp_format='%Y%m%d%H%M%S'</em><span class="sig-paren">)</span><a class="headerlink" href="#gtfsrtk.main.build_augmented_stop_times" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">gtfsrtk.main.</code><code class="descname">build_augmented_stop_times</code><span class="sig-paren">(</span><em>gtfsr_feeds</em>, <em>gtfs_feed</em>, <em>date</em><span class="sig-paren">)</span><a class="headerlink" href="#gtfsrtk.main.build_augmented_stop_times" title="Permalink to this definition">¶</a></dt>
 <dd><p>INPUTS:</p>
 <ul class="simple">
-<li><code class="docutils literal"><span class="pre">gtfsr_path</span></code>: string or Path object; path to a directory that 
-contains GTFSr trip update feeds named &lt;feed time stamp formatted&gt;.json, 
-where the feed time stamp is formatted according to format
-<code class="docutils literal"><span class="pre">timestamp_format</span></code></li>
+<li><code class="docutils literal"><span class="pre">gtfsr_feeds</span></code>: list; GTFSr feeds</li>
 <li><code class="docutils literal"><span class="pre">gtfs_feed</span></code>: GTFSTK Feed instance corresponding to the GTFSr feeds</li>
 <li><code class="docutils literal"><span class="pre">date</span></code>: YYYYMMDD string</li>
 <li><code class="docutils literal"><span class="pre">timestamp_format</span></code>: string or <code class="docutils literal"><span class="pre">None</span></code></li>
@@ -116,7 +113,7 @@ where the feed time stamp is formatted according to format
 <li>A data frame of GTFS stop times for trips scheduled on the given date 
 and containing two extra columns, <code class="docutils literal"><span class="pre">'arrival_delay'</span></code> and 
 <code class="docutils literal"><span class="pre">'departure_delay'</span></code>, which are delay values in seconds 
-for that stop time according to the GTFSr feeds.</li>
+for that stop time according to the GTFSr feeds given.</li>
 </ul>
 </dd></dl>
 
@@ -238,11 +235,11 @@ then leave the values as is.
 Otherwise:</p>
 <ul class="simple">
 <li>If the first delay is more than <code class="docutils literal"><span class="pre">dist_threshold</span></code> distance units 
-from the first stop, then set the first stop delay to zero; otherwise
-set the first stop delay to the first delay.</li>
+from the first stop, then set the first stop delay to zero (charitably);
+otherwise set the first stop delay to the first delay.</li>
 <li>If the last delay is more than <code class="docutils literal"><span class="pre">dist_threshold</span></code> distance units from 
-the last stop, then set the last stop delay to zero; otherwise 
-set the last stop delay to the last delay.</li>
+the last stop, then set the last stop delay to zero (charitably);
+otherwise set the last stop delay to the last delay.</li>
 <li>Linearly interpolate the remaining stop delays by distance.</li>
 </ul>
 </dd></dl>
@@ -268,7 +265,7 @@ set the last stop delay to the last delay.</li>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
-        <li class="nav-item nav-item-0"><a href="index.html#document-index">GTFSrTK 2.0.0 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html#document-index">GTFSrTK  documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

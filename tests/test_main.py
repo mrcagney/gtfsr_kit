@@ -14,11 +14,13 @@ from gtfsrtk.main import *
 
 # Load some feeds
 DATA_DIR = Path('data')
-GTFSR_DIR = DATA_DIR/'auckland_gtfsr_trip_updates'
+GTFS_PATH = DATA_DIR/'test_gtfs.zip'
+GTFSR_DIR = DATA_DIR/'test_gtfsr'
 FEEDS = []
 for path in GTFSR_DIR.iterdir():
     with path.open() as src:
         FEEDS.append(json.load(src))
+DATE = '20160519'
 
 class TestMain(unittest.TestCase):
 
@@ -54,14 +56,16 @@ class TestMain(unittest.TestCase):
         self.assertEqual(set(f.columns), set(expect_cols))
 
     def test_build_augmented_stop_times(self):
-        path = DATA_DIR/'auckland_gtfs_20160519.zip'
-        gtfs_feed = gt.read_gtfs(path, dist_units_in='km')
-        date = '20160519'
-        f = build_augmented_stop_times(GTFSR_DIR, gtfs_feed, date)
+        gtfsr_feeds = []
+        for f in GTFSR_DIR.iterdir():
+            with f.open() as src:
+                gtfsr_feeds.append(json.load(src))
+        gtfs_feed = gt.read_gtfs(GTFS_PATH, dist_units_in='km')
+        f = build_augmented_stop_times(gtfsr_feeds, gtfs_feed, DATE)
         # Should be a data frame
         self.assertIsInstance(f, pd.DataFrame)
         # Should have the correct columns
-        st = gt.get_stop_times(gtfs_feed, date)
+        st = gt.get_stop_times(gtfs_feed, DATE)
         expect_cols = st.columns.tolist() + ['arrival_delay', 
           'departure_delay']
         self.assertEqual(set(f.columns), set(expect_cols))
@@ -69,10 +73,12 @@ class TestMain(unittest.TestCase):
         self.assertEqual(f.shape[0], st.shape[0])
 
     def test_interpolate_delays(self):
-        path = DATA_DIR/'auckland_gtfs_20160519.zip'
-        gtfs_feed = gt.read_gtfs(path, dist_units_in='km')
-        date = '20160519'
-        ast = build_augmented_stop_times(GTFSR_DIR, gtfs_feed, date)
+        gtfsr_feeds = []
+        for f in GTFSR_DIR.iterdir():
+            with f.open() as src:
+                gtfsr_feeds.append(json.load(src))
+        gtfs_feed = gt.read_gtfs(GTFS_PATH, dist_units_in='km')
+        ast = build_augmented_stop_times(gtfsr_feeds, gtfs_feed, DATE)
         f = interpolate_delays(ast, dist_threshold=1)
         # Should be a data frame
         self.assertIsInstance(f, pd.DataFrame)
