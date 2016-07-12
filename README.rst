@@ -35,6 +35,11 @@ Authors
 Changelog
 ==========
 
+3.0.1, 2016-07-12
+------------------
+- Bugfixed ``ipynb/examples.ipynb``
+
+
 3.0.0, 2016-07-12
 ------------------
 - Changed to a small data set for tests
