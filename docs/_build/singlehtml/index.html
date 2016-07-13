@@ -52,7 +52,7 @@
           <div class="body" role="main">
             
   <div class="section" id="gtfsrtk-version-documentation">
-<h1>GTFSrTK 3.0 Documentation<a class="headerlink" href="#gtfsrtk-version-documentation" title="Permalink to this headline">¶</a></h1>
+<h1>GTFSrTK 4.0 Documentation<a class="headerlink" href="#gtfsrtk-version-documentation" title="Permalink to this headline">¶</a></h1>
 <div class="toctree-wrapper compound">
 <span id="document-introduction"></span><p>GTFSrTK is a Python 3.4+ toolkit designed to process General Transit Feed Specification Realtime (GTFSr) data.
 It uses Pandas to do the heavy lifting.</p>
@@ -135,29 +135,28 @@ the form of decoded JSON objects.</p>
 
 <dl class="function">
 <dt id="gtfsrtk.main.collect_feeds">
-<code class="descclassname">gtfsrtk.main.</code><code class="descname">collect_feeds</code><span class="sig-paren">(</span><em>get_feed</em>, <em>frequency</em>, <em>duration</em>, <em>out_dir</em>, <em>num_tries=3</em>, <em>timestamp_format='%Y%m%d%H%M%S'</em><span class="sig-paren">)</span><a class="headerlink" href="#gtfsrtk.main.collect_feeds" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">gtfsrtk.main.</code><code class="descname">collect_feeds</code><span class="sig-paren">(</span><em>get_feed</em>, <em>num_feeds</em>, <em>frequency</em>, <em>out_dir</em>, <em>num_tries=3</em>, <em>timestamp_format='%Y%m%d%H%M%S'</em><span class="sig-paren">)</span><a class="headerlink" href="#gtfsrtk.main.collect_feeds" title="Permalink to this definition">¶</a></dt>
 <dd><p>INPUTS:</p>
 <ul class="simple">
 <li><code class="docutils literal"><span class="pre">get_feed</span></code>: a function that gets GTFSr feeds, e.g. an output of 
 <a class="reference internal" href="#gtfsrtk.main.build_get_feed" title="gtfsrtk.main.build_get_feed"><code class="xref py py-func docutils literal"><span class="pre">build_get_feed()</span></code></a></li>
+<li><code class="docutils literal"><span class="pre">num_feeds</span></code>: integer</li>
 <li><code class="docutils literal"><span class="pre">frequency</span></code>: integer</li>
-<li><code class="docutils literal"><span class="pre">duration</span></code>: integer</li>
 <li><code class="docutils literal"><span class="pre">out_dir</span></code>: string or Path object</li>
 <li><code class="docutils literal"><span class="pre">num_tries</span></code>: integer</li>
 <li><code class="docutils literal"><span class="pre">timestamp_format</span></code>: string; specifies how to format timestamps</li>
 </ul>
 <p>OUTPUTS:</p>
 <p>A collection of GTFSr feeds obtained as follows.
-Execute <code class="docutils literal"><span class="pre">get_feed</span></code> every <code class="docutils literal"><span class="pre">frequency</span></code> seconds for 
-a duration of <code class="docutils literal"><span class="pre">duration</span></code> seconds and store the resulting files as JSON 
-in the directory at <code class="docutils literal"><span class="pre">out_dir</span></code>.
-Each file will be named &#8216;&lt;timestamp&gt;.json&#8217; where &lt;timestamp&gt;
-is the timestamp of the feed object retrieved, formatted 
-via the format string <code class="docutils literal"><span class="pre">timestamp_format</span></code>.
-Try at most <code class="docutils literal"><span class="pre">num_tries</span></code> times in a row to get each trip updates object,
-and write nothing if that fails.
-The number of resulting trip updates will be at most 
-<code class="docutils literal"><span class="pre">duration//frequency</span></code>.</p>
+Execute <code class="docutils literal"><span class="pre">get_feed</span></code> roughly every <code class="docutils literal"><span class="pre">frequency</span></code> seconds to try to 
+get <code class="docutils literal"><span class="pre">num_feeds</span></code> feeds.
+Save each feed in the directory at <code class="docutils literal"><span class="pre">out_dir</span></code>, and name the feed file
+&#8216;&lt;timestamp&gt;.json&#8217; where &lt;timestamp&gt; is the timestamp of the feed 
+formatted via the format string <code class="docutils literal"><span class="pre">timestamp_format</span></code>.
+Try at most <code class="docutils literal"><span class="pre">num_tries</span></code> times in a row to download each feed, 
+and wait <code class="docutils literal"><span class="pre">frequency</span></code> seconds after each successful download.
+The total number of feeds downloaded will be at most <code class="docutils literal"><span class="pre">num_feeds</span></code>
+and exactly <code class="docutils literal"><span class="pre">num_feeds</span></code> if no download fails.</p>
 </dd></dl>
 
 <dl class="function">
