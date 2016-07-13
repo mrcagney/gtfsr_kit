@@ -12,6 +12,7 @@ setup(
     install_requires=[
         'gtfstk>=5.0.0',
         'pandas>=0.18.1, <0.19',
+        'requests',
     ],
 )
 
