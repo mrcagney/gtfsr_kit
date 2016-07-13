@@ -35,6 +35,12 @@ Authors
 Changelog
 ==========
 
+
+4.0.0, 2016-07-13
+------------------
+- Changed the signature of ``main.collect_feeds``
+
+
 3.0.1, 2016-07-12
 ------------------
 - Bugfixed ``ipynb/examples.ipynb``

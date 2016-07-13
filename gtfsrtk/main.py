@@ -31,15 +31,15 @@ def build_get_feed(url, headers, params):
 
     return get_feed
 
-def collect_feeds(get_feed, frequency, duration, out_dir, num_tries=3, 
+def collect_feeds(get_feed, num_feeds, frequency, out_dir, num_tries=3, 
   timestamp_format=ut.TIMESTAMP_FORMAT):
     """
     INPUTS:
 
     - ``get_feed``: a function that gets GTFSr feeds, e.g. an output of 
       :func:`build_get_feed`
+    - ``num_feeds``: integer
     - ``frequency``: integer
-    - ``duration``: integer
     - ``out_dir``: string or Path object
     - ``num_tries``: integer
     - ``timestamp_format``: string; specifies how to format timestamps 
@@ -47,23 +47,21 @@ def collect_feeds(get_feed, frequency, duration, out_dir, num_tries=3,
     OUTPUTS:
 
     A collection of GTFSr feeds obtained as follows.
-    Execute ``get_feed`` every ``frequency`` seconds for 
-    a duration of ``duration`` seconds and store the resulting files as JSON 
-    in the directory at ``out_dir``.
-    Each file will be named '<timestamp>.json' where <timestamp>
-    is the timestamp of the feed object retrieved, formatted 
-    via the format string ``timestamp_format``.
-    Try at most ``num_tries`` times in a row to get each trip updates object,
-    and write nothing if that fails.
-    The number of resulting trip updates will be at most 
-    ``duration//frequency``.
+    Execute ``get_feed`` roughly every ``frequency`` seconds to try to 
+    get ``num_feeds`` feeds.
+    Save each feed in the directory at ``out_dir``, and name the feed file
+    '<timestamp>.json' where <timestamp> is the timestamp of the feed 
+    formatted via the format string ``timestamp_format``.
+    Try at most ``num_tries`` times in a row to download each feed, 
+    and wait ``frequency`` seconds after each successful download.
+    The total number of feeds downloaded will be at most ``num_feeds``
+    and exactly ``num_feeds`` if no download fails. 
     """
     out_dir = Path(out_dir)
     if not out_dir.exists():
         out_dir.mkdir(parents=True)
 
-    num_calls = duration//frequency
-    for i in range(num_calls):
+    for i in range(num_feeds):
         success = False
         n = 1
         while not success and n <= num_tries:
