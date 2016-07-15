@@ -22,7 +22,7 @@ def build_get_feed(url, headers, params):
 
     A function that issues a GET request to the given 
     URL with the given headers and parameters.
-    Intended to be used to build a function that gets GTFSr feeds in 
+    Intended to be used to build a function that gets GTFSR feeds in 
     the form of decoded JSON objects.
     """
     def get_feed():
@@ -31,59 +31,11 @@ def build_get_feed(url, headers, params):
 
     return get_feed
 
-def collect_feeds(get_feed, num_feeds, frequency, out_dir, num_tries=3, 
-  timestamp_format=ut.TIMESTAMP_FORMAT):
-    """
-    INPUTS:
-
-    - ``get_feed``: a function that gets GTFSr feeds, e.g. an output of 
-      :func:`build_get_feed`
-    - ``num_feeds``: integer
-    - ``frequency``: integer
-    - ``out_dir``: string or Path object
-    - ``num_tries``: integer
-    - ``timestamp_format``: string; specifies how to format timestamps 
-
-    OUTPUTS:
-
-    A collection of GTFSr feeds obtained as follows.
-    Execute ``get_feed`` roughly every ``frequency`` seconds to try to 
-    get ``num_feeds`` feeds.
-    Save each feed in the directory at ``out_dir``, and name the feed file
-    '<timestamp>.json' where <timestamp> is the timestamp of the feed 
-    formatted via the format string ``timestamp_format``.
-    Try at most ``num_tries`` times in a row to download each feed, 
-    and wait ``frequency`` seconds after each successful download.
-    The total number of feeds downloaded will be at most ``num_feeds``
-    and exactly ``num_feeds`` if no download fails. 
-    """
-    out_dir = Path(out_dir)
-    if not out_dir.exists():
-        out_dir.mkdir(parents=True)
-
-    for i in range(num_feeds):
-        success = False
-        n = 1
-        while not success and n <= num_tries:
-            try:
-                feed = get_feed()
-                success = True
-                # Write to file
-                t = get_timestamp(feed, timestamp_format)
-                path = out_dir/'{0}.json'.format(t)
-                with path.open('w') as tgt:
-                    json.dump(feed, tgt)
-
-            except requests.exceptions.RequestException as e:
-                continue
-            n += 1
-        time.sleep(frequency)
-
 def get_timestamp(feed, timestamp_format=ut.TIMESTAMP_FORMAT):
     """
     INPUTS:
 
-    - ``feed``: GTFSr feed
+    - ``feed``: GTFSR feed
     - ``timestamp_format``: string; specifies how to format timestamps 
 
     OUTPUTS:
@@ -103,7 +55,7 @@ def extract_delays(feed, timestamp_format=ut.TIMESTAMP_FORMAT):
     """
     INPUTS:
 
-    - ``feed``: GTFSr feed
+    - ``feed``: GTFSR feed
     - ``timestamp_format``: string; specifies how to format timestamps 
 
     OUTPUTS:
@@ -200,8 +152,8 @@ def build_augmented_stop_times(gtfsr_feeds, gtfs_feed, date):
     """
     INPUTS:
 
-    - ``gtfsr_feeds``: list; GTFSr feeds
-    - ``gtfs_feed``: GTFSTK Feed instance corresponding to the GTFSr feeds 
+    - ``gtfsr_feeds``: list; GTFSR feeds
+    - ``gtfs_feed``: GTFSTK Feed instance corresponding to the GTFSR feeds 
     - ``date``: YYYYMMDD string
     - ``timestamp_format``: string or ``None``
 
@@ -210,13 +162,13 @@ def build_augmented_stop_times(gtfsr_feeds, gtfs_feed, date):
     - A data frame of GTFS stop times for trips scheduled on the given date 
       and containing two extra columns, ``'arrival_delay'`` and 
       ``'departure_delay'``, which are delay values in seconds 
-      for that stop time according to the GTFSr feeds given.  
+      for that stop time according to the GTFSR feeds given.  
 
     """
     # Get scheduled stop times for date
     st = gt.get_stop_times(gtfs_feed, date)
     
-    # Get GTFSr timestamps pertinent to date
+    # Get GTFSR timestamps pertinent to date
     start_time = '000000'
     start_datetime = date + start_time
     end_time = gt.timestr_to_seconds(st['departure_time'].max()) + 20*60 # Plus 20 minutes fuzz

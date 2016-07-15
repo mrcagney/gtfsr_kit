@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>GTFSrTK documentation</title>
+    <title>GTFSRTK documentation</title>
     
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -29,7 +29,7 @@
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
-        <li class="nav-item nav-item-0"><a href="index.html#document-index">GTFSrTK  documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html#document-index">GTFSRTK  documentation</a> &raquo;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
@@ -52,9 +52,9 @@
           <div class="body" role="main">
             
   <div class="section" id="gtfsrtk-version-documentation">
-<h1>GTFSrTK 4.0 Documentation<a class="headerlink" href="#gtfsrtk-version-documentation" title="Permalink to this headline">¶</a></h1>
+<h1>GTFSRTK 4.0 Documentation<a class="headerlink" href="#gtfsrtk-version-documentation" title="Permalink to this headline">¶</a></h1>
 <div class="toctree-wrapper compound">
-<span id="document-introduction"></span><p>GTFSrTK is a Python 3.4+ toolkit designed to process General Transit Feed Specification Realtime (GTFSr) data.
+<span id="document-introduction"></span><p>GTFSRTK is a Python 3.4+ toolkit designed to process General Transit Feed Specification Realtime (GTFSR) data.
 It uses Pandas to do the heavy lifting.</p>
 <div class="section" id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
@@ -67,7 +67,7 @@ It uses Pandas to do the heavy lifting.</p>
 <div class="section" id="conventions">
 <h2>Conventions<a class="headerlink" href="#conventions" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li>Unless specified otherwise, assume all GTFSr feeds are in the form of Python dictionaries</li>
+<li>Unless specified otherwise, assume all GTFSR feeds are in the form of Python dictionaries</li>
 </ul>
 </div>
 <span id="document-modules"></span><div class="section" id="module-gtfsrtk.utilities">
@@ -103,8 +103,8 @@ or string (if <code class="docutils literal"><span class="pre">inverse</span></c
 <code class="descclassname">gtfsrtk.main.</code><code class="descname">build_augmented_stop_times</code><span class="sig-paren">(</span><em>gtfsr_feeds</em>, <em>gtfs_feed</em>, <em>date</em><span class="sig-paren">)</span><a class="headerlink" href="#gtfsrtk.main.build_augmented_stop_times" title="Permalink to this definition">¶</a></dt>
 <dd><p>INPUTS:</p>
 <ul class="simple">
-<li><code class="docutils literal"><span class="pre">gtfsr_feeds</span></code>: list; GTFSr feeds</li>
-<li><code class="docutils literal"><span class="pre">gtfs_feed</span></code>: GTFSTK Feed instance corresponding to the GTFSr feeds</li>
+<li><code class="docutils literal"><span class="pre">gtfsr_feeds</span></code>: list; GTFSR feeds</li>
+<li><code class="docutils literal"><span class="pre">gtfs_feed</span></code>: GTFSTK Feed instance corresponding to the GTFSR feeds</li>
 <li><code class="docutils literal"><span class="pre">date</span></code>: YYYYMMDD string</li>
 <li><code class="docutils literal"><span class="pre">timestamp_format</span></code>: string or <code class="docutils literal"><span class="pre">None</span></code></li>
 </ul>
@@ -113,7 +113,7 @@ or string (if <code class="docutils literal"><span class="pre">inverse</span></c
 <li>A data frame of GTFS stop times for trips scheduled on the given date 
 and containing two extra columns, <code class="docutils literal"><span class="pre">'arrival_delay'</span></code> and 
 <code class="docutils literal"><span class="pre">'departure_delay'</span></code>, which are delay values in seconds 
-for that stop time according to the GTFSr feeds given.</li>
+for that stop time according to the GTFSR feeds given.</li>
 </ul>
 </dd></dl>
 
@@ -129,7 +129,7 @@ for that stop time according to the GTFSr feeds given.</li>
 <p>OUTPUTS:</p>
 <p>A function that issues a GET request to the given 
 URL with the given headers and parameters.
-Intended to be used to build a function that gets GTFSr feeds in 
+Intended to be used to build a function that gets GTFSR feeds in 
 the form of decoded JSON objects.</p>
 </dd></dl>
 
@@ -138,7 +138,7 @@ the form of decoded JSON objects.</p>
 <code class="descclassname">gtfsrtk.main.</code><code class="descname">collect_feeds</code><span class="sig-paren">(</span><em>get_feed</em>, <em>num_feeds</em>, <em>frequency</em>, <em>out_dir</em>, <em>num_tries=3</em>, <em>timestamp_format='%Y%m%d%H%M%S'</em><span class="sig-paren">)</span><a class="headerlink" href="#gtfsrtk.main.collect_feeds" title="Permalink to this definition">¶</a></dt>
 <dd><p>INPUTS:</p>
 <ul class="simple">
-<li><code class="docutils literal"><span class="pre">get_feed</span></code>: a function that gets GTFSr feeds, e.g. an output of 
+<li><code class="docutils literal"><span class="pre">get_feed</span></code>: a function that gets GTFSR feeds, e.g. an output of 
 <a class="reference internal" href="#gtfsrtk.main.build_get_feed" title="gtfsrtk.main.build_get_feed"><code class="xref py py-func docutils literal"><span class="pre">build_get_feed()</span></code></a></li>
 <li><code class="docutils literal"><span class="pre">num_feeds</span></code>: integer</li>
 <li><code class="docutils literal"><span class="pre">frequency</span></code>: integer</li>
@@ -147,7 +147,7 @@ the form of decoded JSON objects.</p>
 <li><code class="docutils literal"><span class="pre">timestamp_format</span></code>: string; specifies how to format timestamps</li>
 </ul>
 <p>OUTPUTS:</p>
-<p>A collection of GTFSr feeds obtained as follows.
+<p>A collection of GTFSR feeds obtained as follows.
 Execute <code class="docutils literal"><span class="pre">get_feed</span></code> roughly every <code class="docutils literal"><span class="pre">frequency</span></code> seconds to try to 
 get <code class="docutils literal"><span class="pre">num_feeds</span></code> feeds.
 Save each feed in the directory at <code class="docutils literal"><span class="pre">out_dir</span></code>, and name the feed file
@@ -183,7 +183,7 @@ same trips on different days.</p>
 <code class="descclassname">gtfsrtk.main.</code><code class="descname">extract_delays</code><span class="sig-paren">(</span><em>feed</em>, <em>timestamp_format='%Y%m%d%H%M%S'</em><span class="sig-paren">)</span><a class="headerlink" href="#gtfsrtk.main.extract_delays" title="Permalink to this definition">¶</a></dt>
 <dd><p>INPUTS:</p>
 <ul class="simple">
-<li><code class="docutils literal"><span class="pre">feed</span></code>: GTFSr feed</li>
+<li><code class="docutils literal"><span class="pre">feed</span></code>: GTFSR feed</li>
 <li><code class="docutils literal"><span class="pre">timestamp_format</span></code>: string; specifies how to format timestamps</li>
 </ul>
 <p>OUTPUTS:</p>
@@ -204,7 +204,7 @@ same trips on different days.</p>
 <code class="descclassname">gtfsrtk.main.</code><code class="descname">get_timestamp</code><span class="sig-paren">(</span><em>feed</em>, <em>timestamp_format='%Y%m%d%H%M%S'</em><span class="sig-paren">)</span><a class="headerlink" href="#gtfsrtk.main.get_timestamp" title="Permalink to this definition">¶</a></dt>
 <dd><p>INPUTS:</p>
 <ul class="simple">
-<li><code class="docutils literal"><span class="pre">feed</span></code>: GTFSr feed</li>
+<li><code class="docutils literal"><span class="pre">feed</span></code>: GTFSR feed</li>
 <li><code class="docutils literal"><span class="pre">timestamp_format</span></code>: string; specifies how to format timestamps</li>
 </ul>
 <p>OUTPUTS:</p>
@@ -264,7 +264,7 @@ otherwise set the last stop delay to the last delay.</li>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
-        <li class="nav-item nav-item-0"><a href="index.html#document-index">GTFSrTK  documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html#document-index">GTFSRTK  documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

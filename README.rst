@@ -1,6 +1,6 @@
-GTFSrTK
+GTFSRTK
 ********
-A Python 3.4+ toolkit to process General Transit Feed Specification Realtime (GTFSr) data.
+A Python 3.4+ toolkit to process General Transit Feed Specification Realtime (GTFSR) data.
 Uses Pandas to do the heavy lifting.
 
 
@@ -23,7 +23,7 @@ Notes
 ======
 - Development status is Alpha
 - This project uses `semantic versioning <http://semver.org/>`_
-- Only works on GTFSr feeds that are available in JSON format. I'll incorporate the protobuf format once `the Python 3 binding for protobuf gets fixed <https://github.com/google/gtfs-realtime-bindings/issues/17>`_.
+- Only works on GTFSR feeds that are available in JSON format. I'll incorporate the protobuf format once `the Python 3 binding for protobuf gets fixed <https://github.com/google/gtfs-realtime-bindings/issues/17>`_.
 - This project has been funded generously in part by `MRCagney <http://www.mrcagney.com/>`_
 
 

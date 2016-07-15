@@ -7,7 +7,7 @@ setup(
     packages=['gtfsrtk', 'tests'],
     url='https://github.com/araichev/gtfsrtk',
     license='LICENSE',
-    description='A Python 3.4 tool kit for processing General Transit Feed Specification Realtime (GTFSr) data',
+    description='A Python 3.4 tool kit for processing General Transit Feed Specification Realtime (GTFSR) data',
     long_description=open('README.rst').read(),
     install_requires=[
         'gtfstk>=5.0.0',
