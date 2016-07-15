@@ -1,13 +1,13 @@
-
 import os
 import datetime as dt
 import json
 from functools import wraps
+from pathlib import Path 
 
 
-PROJECT_ROOT = os.path.abspath(os.path.join(
-  os.path.dirname(__file__), '../'))
-SECRETS_PATH = os.path.join(PROJECT_ROOT, 'secrets.json')
+PROJECT_DIR = Path(os.path.abspath(os.path.join(
+  os.path.dirname(__file__), '../'))).resolve()
+SECRETS_PATH = PROJECT_DIR/'secrets.json'
 TIMESTAMP_FORMAT = '%Y%m%d%H%M%S'
 
 def time_it(f):
@@ -26,16 +26,13 @@ def time_it(f):
         return result
     return wrap
 
-def get_secret(secret, secrets_path=SECRETS_PATH):
+def get_secret(key, path=SECRETS_PATH):
     """
     Get the given setting variable or return explicit exception.
     """
-    with open(secrets_path) as src:
+    with path.open() as src:
         d = json.loads(src.read())
-    try:
-        return d[secret]
-    except KeyError:
-        raise ValueError("Set the {0} secrets variable".format(secret))
+    return d[key]
 
 def timestamp_to_str(t, format=TIMESTAMP_FORMAT, inverse=False):
     """
