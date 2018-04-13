@@ -11,6 +11,7 @@ pandas = "*"
 gtfstk = "*"
 requests = "*"
 jupyter = "*"
+pytest = "*"
 
 [requires]
 python_version = "3.5"
