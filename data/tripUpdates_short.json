@@ -1,0 +1,382 @@
+{
+  "entity": [
+    {
+      "id": "2014-11-30:VTN:1011:11462",
+      "tripUpdate": {
+        "stopTimeUpdate": [
+          {
+            "departure": {
+              "delay": -2,
+              "time": "1417382878"
+            },
+            "stopId": "31464",
+            "arrival": {
+              "delay": -223,
+              "time": "1417382657"
+            },
+            "stopSequence": 1
+          },
+          {
+            "departure": {
+              "delay": -47,
+              "time": "1417382953"
+            },
+            "stopId": "31399",
+            "arrival": {
+              "delay": -79,
+              "time": "1417382921"
+            },
+            "stopSequence": 2
+          },
+          {
+            "departure": {
+              "delay": -57,
+              "time": "1417383003"
+            },
+            "stopId": "31311",
+            "arrival": {
+              "delay": -87,
+              "time": "1417382973"
+            },
+            "stopSequence": 3
+          },
+          {
+            "departure": {
+              "delay": -45,
+              "time": "1417383195"
+            },
+            "stopId": "31764",
+            "arrival": {
+              "delay": -132,
+              "time": "1417383108"
+            },
+            "stopSequence": 4
+          },
+          {
+            "departure": {
+              "delay": -90,
+              "time": "1417383210"
+            },
+            "stopId": "322002",
+            "arrival": {
+              "delay": -105,
+              "time": "1417383195"
+            },
+            "stopSequence": 5
+          },
+          {
+            "departure": {
+              "delay": -98,
+              "time": "1417383262"
+            },
+            "stopId": "30902",
+            "arrival": {
+              "delay": -112,
+              "time": "1417383248"
+            },
+            "stopSequence": 6
+          },
+          {
+            "departure": {
+              "delay": -120,
+              "time": "1417383300"
+            },
+            "stopId": "31453",
+            "arrival": {
+              "delay": -130,
+              "time": "1417383290"
+            },
+            "stopSequence": 7
+          },
+          {
+            "departure": {
+              "delay": -68,
+              "time": "1417383412"
+            },
+            "stopId": "32288",
+            "arrival": {
+              "delay": -126,
+              "time": "1417383354"
+            },
+            "stopSequence": 8
+          },
+          {
+            "departure": {
+              "delay": -175,
+              "time": "1417383425"
+            },
+            "stopId": "31061",
+            "arrival": {
+              "delay": -188,
+              "time": "1417383412"
+            },
+            "stopSequence": 9
+          },
+          {
+            "departure": {
+              "delay": -162,
+              "time": "1417383498"
+            },
+            "stopId": "31654",
+            "arrival": {
+              "delay": -200,
+              "time": "1417383460"
+            },
+            "stopSequence": 11
+          },
+          {
+            "departure": {
+              "delay": 172,
+              "time": "1417384012"
+            },
+            "stopId": "32468",
+            "arrival": {
+              "delay": -195,
+              "time": "1417383525"
+            },
+            "stopSequence": 13
+          },
+          {
+            "departure": {
+              "delay": 160,
+              "time": "1417384060"
+            },
+            "stopId": "30715",
+            "arrival": {
+              "delay": 128,
+              "time": "1417384028"
+            },
+            "stopSequence": 14
+          },
+          {
+            "departure": {
+              "delay": 90,
+              "time": "1417384110"
+            },
+            "stopId": "31330",
+            "arrival": {
+              "delay": 90,
+              "time": "1417384110"
+            },
+            "stopSequence": 15
+          },
+          {
+            "departure": {
+              "delay": 113,
+              "time": "1417384253"
+            },
+            "stopId": "31314",
+            "arrival": {
+              "delay": 113,
+              "time": "1417384253"
+            },
+            "stopSequence": 16
+          },
+          {
+            "departure": {
+              "delay": 164,
+              "time": "1417384364"
+            },
+            "stopId": "30940",
+            "arrival": {
+              "delay": 133,
+              "time": "1417384333"
+            },
+            "stopSequence": 17
+          },
+          {
+            "departure": {
+              "delay": 169,
+              "time": "1417384489"
+            },
+            "stopId": "30873",
+            "arrival": {
+              "delay": 128,
+              "time": "1417384448"
+            },
+            "stopSequence": 18
+          },
+          {
+            "departure": {
+              "delay": 167,
+              "time": "1417384547"
+            },
+            "stopId": "31067",
+            "arrival": {
+              "delay": 135,
+              "time": "1417384515"
+            },
+            "stopSequence": 19
+          },
+          {
+            "departure": {
+              "delay": 145,
+              "time": "1417384585"
+            },
+            "stopId": "30939",
+            "arrival": {
+              "delay": 145,
+              "time": "1417384585"
+            },
+            "stopSequence": 20
+          },
+          {
+            "departure": {
+              "delay": 135,
+              "time": "1417384635"
+            },
+            "stopId": "32095",
+            "arrival": {
+              "delay": 135,
+              "time": "1417384635"
+            },
+            "stopSequence": 21
+          },
+          {
+            "departure": {
+              "delay": 174,
+              "time": "1417384734"
+            },
+            "stopId": "31738",
+            "arrival": {
+              "delay": 146,
+              "time": "1417384706"
+            },
+            "stopSequence": 22
+          },
+          {
+            "departure": {
+              "delay": 158,
+              "time": "1417384778"
+            },
+            "stopId": "32272",
+            "arrival": {
+              "delay": 150,
+              "time": "1417384770"
+            },
+            "stopSequence": 23
+          },
+          {
+            "departure": {
+              "delay": 113,
+              "time": "1417384793"
+            },
+            "stopId": "31698",
+            "arrival": {
+              "delay": 113,
+              "time": "1417384793"
+            },
+            "stopSequence": 24
+          },
+          {
+            "departure": {
+              "delay": 160,
+              "time": "1417384900"
+            },
+            "stopId": "32220",
+            "arrival": {
+              "delay": 128,
+              "time": "1417384868"
+            },
+            "stopSequence": 25
+          },
+          {
+            "departure": {
+              "delay": 124,
+              "time": "1417384924"
+            },
+            "stopId": "32338",
+            "arrival": {
+              "delay": 124,
+              "time": "1417384924"
+            },
+            "stopSequence": 26
+          },
+          {
+            "departure": {
+              "delay": 99,
+              "time": "1417385019"
+            },
+            "stopId": "32423",
+            "arrival": {
+              "delay": 99,
+              "time": "1417385019"
+            },
+            "stopSequence": 27
+          },
+          {
+            "departure": {
+              "delay": 40,
+              "time": "1417385020"
+            },
+            "stopId": "30676",
+            "arrival": {
+              "delay": 40,
+              "time": "1417385020"
+            },
+            "stopSequence": 33
+          },
+          {
+            "departure": {
+              "delay": -15,
+              "time": "1417385025"
+            },
+            "stopId": "31148",
+            "arrival": {
+              "delay": -20,
+              "time": "1417385020"
+            },
+            "stopSequence": 34
+          },
+          {
+            "departure": {
+              "delay": 142,
+              "time": "1417385182"
+            },
+            "stopId": "31839",
+            "arrival": {
+              "delay": 129,
+              "time": "1417385169"
+            },
+            "stopSequence": 35
+          },
+          {
+            "departure": {
+              "delay": 117,
+              "time": "1417385217"
+            },
+            "stopId": "31776",
+            "arrival": {
+              "delay": 117,
+              "time": "1417385217"
+            },
+            "stopSequence": 36
+          },
+          {
+            "departure": {
+              "delay": 152,
+              "time": "1417385312"
+            },
+            "stopId": "32533",
+            "arrival": {
+              "delay": 152,
+              "time": "1417385312"
+            },
+            "scheduleRelationship": "SCHEDULED",
+            "stopSequence": 38
+          }
+        ],
+        "trip": {
+          "startDate": "20141130",
+          "tripId": "18594691",
+          "scheduleRelationship": "SCHEDULED"
+        }
+      }
+    }
+  ],
+  "header": {
+    "gtfsRealtimeVersion": "1.0",
+    "incrementality": "FULL_DATASET",
+    "timestamp": "1417387583"
+  }
+}

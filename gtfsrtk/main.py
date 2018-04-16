@@ -1,10 +1,6 @@
 """
-Throughout this code a *GTFSR feed* is a Python dictionary version
-of a Protocol Buffer GTFSR feed.
-In particular, the top level keys of the feed are
-``'header'`` and ``'entity'``.
-The dictionary versions are bigger but, in my opinion, easier to
-reason about.
+For a definition of General Transit Feed Specification Realtime (GTFSR),
+see https://developers.google.com/transit/gtfs-realtime/reference/.
 """
 import datetime as dt
 import json
@@ -19,13 +15,13 @@ import gtfstk as gt
 
 TIMESTAMP_FORMAT = '%Y%m%d%H%M%S'
 
-def pb_to_json(pb_feed):
-    """
-    Convert a Protocol Buffer GTFSR feed into a dictionary GTFSR feed.
-    """
-    return json.loads(json_format.MessageToJson(pb_feed))
-
 def read_gtfsr(path, *, from_json=False):
+    """
+    Given a path (string or Path object) to a GTFSR feed file,
+    return the corresponding GTFS feed (FeedMessage instance).
+    If ``from_json``, then assume the feed file is in JSON format;
+    otherwise, assume the feed file is in Protocol Buffer format.
+    """
     path = Path(path)
     feed = gtfs_realtime_pb2.FeedMessage()
 
@@ -37,14 +33,37 @@ def read_gtfsr(path, *, from_json=False):
 
     return feed
 
+def write_gtfsr(feed, path, *, to_json=False):
+    """
+    Given a GTFSR feed (FeedMessage instance), write it to the given
+    file path (string or Path object).
+    If ``to_json``, then save the file as JSON;
+    otherwise save it as Protocol Buffer.
+    """
+    path = Path(path)
+
+    if to_json:
+        with path.open('w') as tgt:
+            tgt.write(json_format.MessageToJson(feed))
+    else:
+        with path.open('wb') as tgt:
+            tgt.write(feed.SerializeToString())
+
+def to_dict(feed):
+    """
+    Convert the given GTFSR feed (FeedMessage instance) to a dictionary.
+    """
+    return json.loads(json_format.MessageToJson(feed))
+
 def timestamp_to_str(t, format=TIMESTAMP_FORMAT, *, inverse=False):
     """
-    Given a POSIX timestamp (float) ``t``, format it as a string
+    Given a POSIX timestamp (int) ``t``, format it as a datetime string
     in the given format.
     If ``inverse``, then do the inverse, that is, assume ``t`` is
-    a string in the given format and return its corresponding timestamp.
-    If ``format is None``, then cast ``t`` as a float (if not ``inverse``)
-    or string (if ``inverse``) directly.
+    a datetime string in the given format and return its corresponding
+    timestamp.
+    If ``format is None``, then cast ``t`` as an int
+    (if not ``inverse``) or string (if ``inverse``) directly.
     """
     if not inverse:
         if format is None:
@@ -53,43 +72,24 @@ def timestamp_to_str(t, format=TIMESTAMP_FORMAT, *, inverse=False):
             result = dt.datetime.fromtimestamp(t).strftime(format)
     else:
         if format is None:
-            result = float(t)
+            result = int(t)
         else:
             result = dt.datetime.strptime(t, format).timestamp()
     return result
 
 def get_timestamp(feed, timestamp_format=TIMESTAMP_FORMAT):
     """
-    INPUTS:
-
-    - ``feed``: GTFSR feed
-    - ``timestamp_format``: string; specifies how to format timestamps
-
-    OUTPUTS:
-
-    The timestamp of the feed formatted according to ``timestamp_format``.
-    If the feed is empty or ``None``, return ``None``.
+    Given a GTFSR feed (FeedMessage instance), return the timestamp
+    of the feed as a date string in the given format.
+    Note that an empty feed has an (unformatted) timestamp of 0.
     """
-    if not feed:
-        result = None
-    elif isinstance(feed, gtfs_realtime_pb2.FeedMessage):
-        result = timestamp_to_str(feed.header.timestamp,
-          timestamp_format)
-    else:
-        result = timestamp_to_str(feed['header']['timestamp'],
-          timestamp_format)
-    return result
+    return timestamp_to_str(feed.header.timestamp, timestamp_format)
 
 def extract_delays(feed, timestamp_format=TIMESTAMP_FORMAT):
     """
-    INPUTS:
-
-    - ``feed``: GTFSR feed
-    - ``timestamp_format``: string; specifies how to format timestamps
-
-    OUTPUTS:
-
-    A Pandas data frame built from the feed with the columns:
+    Given a GTFSR feed (FeedMessage instance) and a timestamp format,
+    extract the delays from the feed and return a DataFrame
+    with feed with the columns:
 
     - route_id
     - trip_id
@@ -98,7 +98,7 @@ def extract_delays(feed, timestamp_format=TIMESTAMP_FORMAT):
     - arrival_delay
     - departure_delay
 
-    If the feed has no trip updates, then the data frame will be empty.
+    If the feed has no trip updates, then return an empty DataFrame.
     """
     rows = []
     if isinstance(feed, gtfs_realtime_pb2.FeedMessage):
@@ -130,22 +130,21 @@ def extract_delays(feed, timestamp_format=TIMESTAMP_FORMAT):
 
 def combine_delays(delays_list):
     """
-    INPUTS:
-
-    - ``delays_list``: nonempty list of delay data frames, each of the form
-      output by :func:`extract_delays`
-
-    OUTPUTS:
-
-    A data frame of the same format as each data frame in ``delays_list``
-    obtained as follows
+    Given a list of DataFrames of the form output by the function
+    :func:`extract_delays`, combine them into a single DataFrame as
+    follows and return the result.
     Concatenate ``delays_list`` and remove duplicate
     [route_id, trip_id, stop_sequence]
-    entries by combining their non-null delay values
-    into one entry.
-    Warning: for a sensible output, don't include in ``delays_list`` the
-    same trips on different days.
+    entries by combining their non-null delay values into one entry.
+
+    Warning: to ensure sensible output, don't include in ``delays_list``
+    the same trips on different days.
+
+    Return an empty DataFrame if ``delays_list`` is empty.
     """
+    if not delays_list:
+        return pd.DataFrame()
+
     f = pd.concat(delays_list)
     f = f.drop_duplicates()
     f = f.dropna(subset=['arrival_delay', 'departure_delay'],

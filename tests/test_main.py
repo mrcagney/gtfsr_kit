@@ -1,30 +1,47 @@
-import pandas as pd
+import shutil
 
-from .context import gtfsrtk, feeds, date, DATA_DIR, GTFSR_DIR, GTFS_PATH
+import pandas as pd
+from google.transit.gtfs_realtime_pb2 import FeedMessage
+
+from .context import gtfsrtk, date, DATA_DIR, GTFSR_DIR, GTFS_PATH
 from gtfsrtk import *
 
 
-def test_pb_to_json():
-    path = DATA_DIR/'tripUpdates.pb'
-    feed = gtfs_realtime_pb2.FeedMessage()
-    with path.open('rb') as src:
-        feed.ParseFromString(src.read())
-
-    feed_j = pb_to_json(feed)
-    assert isinstance(feed_j, dict)
-    assert set(feed_j.keys()) == {'header', 'entity'}
+path = DATA_DIR/'tripUpdates_short.json'
+feed = read_gtfsr(path, from_json=True)
 
 def test_read_gtfsr():
     path = DATA_DIR/'tripUpdates.pb'
     feed = read_gtfsr(path)
-    assert isinstance(feed, dict)
-    assert set(feed.keys()) == {'header', 'entity'}
+    assert isinstance(feed, FeedMessage)
 
-    feed = read_gtfsr(path, as_pb=True)
-    assert isinstance(feed, gtfs_realtime_pb2.FeedMessage)
+    path = DATA_DIR/'tripUpdates_short.json'
+    feed = read_gtfsr(path, from_json=True)
+    assert isinstance(feed, FeedMessage)
+
+def test_write_gtfsr():
+    paths = [DATA_DIR/'tripUpdates.pb', DATA_DIR/'tripUpdates_short.json']
+    json_flags = [False, True]
+    for path, json_flag in zip(paths, json_flags):
+        # Test round trip read-write-read
+        path1 = path
+        feed1 = read_gtfsr(path1, from_json=json_flag)
+
+        path2 = path1.parent/'tmp'
+        write_gtfsr(feed1, path2, to_json=json_flag)
+
+        feed2 = read_gtfsr(path2, from_json=json_flag)
+        assert feed1 == feed2
+
+        path2.unlink()
+
+def test_to_dict():
+    d = to_dict(feed)
+    assert isinstance(d, dict)
+    assert set(d.keys()) == {'header', 'entity'}
 
 def test_timestamp_to_str():
-    t = 69.0
+    t = 69
     for format in [None, TIMESTAMP_FORMAT]:
         s = timestamp_to_str(t)
         # Should be a string
@@ -34,62 +51,75 @@ def test_timestamp_to_str():
         assert t == tt
 
 def test_get_timestamp():
-    # Null feed should yield None
-    assert get_timestamp(None) is None
-    # Timestamp should be a string
-    assert isinstance(get_timestamp(feeds[0]), str)
+    for f in [FeedMessage(), feed]:
+        assert isinstance(get_timestamp(f), str)
 
 def test_extract_delays():
-    for feed in [None, feeds[0]]:
-        delays = extract_delays(feed)
+    for f in [FeedMessage(), feed]:
+        delays = extract_delays(f)
+
         # Should be a data frame
         assert isinstance(delays, pd.DataFrame)
-        # Should have the correct columns
-        expect_cols = ['route_id', 'trip_id', 'stop_id',
-          'stop_sequence', 'arrival_delay', 'departure_delay']
-        assert set(delays.columns) == set(expect_cols)
+
+        if f.header.timestamp:
+            # Should have the correct columns
+            expect_cols = ['route_id', 'trip_id', 'stop_id',
+              'stop_sequence', 'arrival_delay', 'departure_delay']
+            assert set(delays.columns) == set(expect_cols)
+        else:
+            # Should be empty
+            assert delays.empty
 
 def test_combine_delays():
-    delays_list = [extract_delays(f) for f in feeds]
+    delays_list = [extract_delays(feed), extract_delays(feed)]
     f = combine_delays(delays_list)
+
     # Should be a data frame
     assert isinstance(f, pd.DataFrame)
+
     # Should have the correct columns
     expect_cols = ['route_id', 'trip_id', 'stop_id',
       'stop_sequence', 'arrival_delay', 'departure_delay']
     assert set(f.columns) == set(expect_cols)
 
+    # Should eliminate duplicates
+    assert pd.DataFrame.equals(f, extract_delays(feed))
+
 def test_build_augmented_stop_times():
-    gtfsr_feeds = []
-    for f in GTFSR_DIR.iterdir():
-        with f.open() as src:
-            gtfsr_feeds.append(json.load(src))
+    gtfsr_feeds = [read_gtfsr(path, from_json=True)
+      for path in GTFSR_DIR.iterdir()]
     gtfs_feed = gt.read_gtfs(GTFS_PATH, dist_units='km')
+
     f = build_augmented_stop_times(gtfsr_feeds, gtfs_feed, date)
+
     # Should be a data frame
     assert isinstance(f, pd.DataFrame)
+
     # Should have the correct columns
     st = gt.get_stop_times(gtfs_feed, date)
     expect_cols = st.columns.tolist() + ['arrival_delay',
       'departure_delay']
     assert set(f.columns) == set(expect_cols)
+
     # Should have the correct number of rows
     assert f.shape[0] == st.shape[0]
 
 def test_interpolate_delays():
-    gtfsr_feeds = []
-    for f in GTFSR_DIR.iterdir():
-        with f.open() as src:
-            gtfsr_feeds.append(json.load(src))
+    gtfsr_feeds = [read_gtfsr(path, from_json=True)
+      for path in GTFSR_DIR.iterdir()]
     gtfs_feed = gt.read_gtfs(GTFS_PATH, dist_units='km')
     ast = build_augmented_stop_times(gtfsr_feeds, gtfs_feed, date)
     f = interpolate_delays(ast, dist_threshold=1)
+
     # Should be a data frame
     assert isinstance(f, pd.DataFrame)
+
     # Should have the correct columns
     assert set(f.columns) == set(ast.columns)
+
     # Should have the correct number of rows
     assert f.shape[0] == ast.shape[0]
+
     # For each trip, delays should be all nan or filled
     for __, group in f.groupby('trip_id'):
         n = group.shape[0]
