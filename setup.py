@@ -20,8 +20,9 @@ setup(
     long_description=readme,
     license=license,
     install_requires=[
-        'gtfstk>=5.0.0',
-        'pandas>=0.18.1',
+        'gtfs-realtime-bindings >= 0.0.5',
+        'gtfstk >= 5.0.0',
+        'pandas >= 0.18.1',
     ],
     packages=find_packages(exclude=('tests', 'docs'))
  )
