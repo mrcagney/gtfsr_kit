@@ -33,10 +33,13 @@ def test_write_gtfsr():
 
         path2.unlink()
 
-def test_dictify():
-    d = dictify(feed)
+def test_feed_to_dict():
+    d = feed_to_dict(feed)
     assert isinstance(d, dict)
     assert set(d.keys()) == {'header', 'entity'}
+
+def test_dict_to_feed():
+    assert feed == dict_to_feed(feed_to_dict(feed))
 
 def test_timestamp_to_str():
     t = 69

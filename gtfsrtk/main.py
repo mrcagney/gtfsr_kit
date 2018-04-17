@@ -49,11 +49,18 @@ def write_gtfsr(feed, path, *, to_json=False):
         with path.open('wb') as tgt:
             tgt.write(feed.SerializeToString())
 
-def dictify(feed):
+def feed_to_dict(feed):
     """
     Convert the given GTFSR feed (FeedMessage instance) to a dictionary.
     """
     return json.loads(json_format.MessageToJson(feed))
+
+def dict_to_feed(feed_dict):
+    """
+    Convert the given dictionary to a GTFSR feed (FeedMessage instance).
+    """
+    return json_format.Parse(json.dumps(feed_dict),
+      gtfs_realtime_pb2.FeedMessage())
 
 def timestamp_to_str(t, datetime_format=DATETIME_FORMAT, *, inverse=False):
     """

@@ -5,7 +5,7 @@ GTFSRTK
 
 GTFSRTK is a tiny Python 3.5+ toolkit to process `General Transit Feed Specification Realtime (GTFSR) data <https://developers.google.com/transit/gtfs-realtime/reference>`_.
 It does some simple things like read and write Protocol Buffer or JSON feed files.
-It also does some complex things like extract and combine delays into DataFrames using Pandas.
+It also does some complex things like extract and combine delays into Pandas DataFrames.
 
 
 Installation
@@ -38,6 +38,11 @@ Authors
 Changelog
 ==========
 
+6.0.0, 2018-04-18
+------------------
+- Renamed function ``dictify`` to ``feed_to_dict`` and added the inverse function ``dict_to_feed``
+
+
 5.0.1, 2018-04-17
 ------------------
 - Fixed setup.py
@@ -45,9 +50,9 @@ Changelog
 
 5.0.0, 2018-04-17
 ------------------
-- Simplified code
-- Now finally handles Protocol Buffer feed files (thanks to version 0.0.5 of `the Python gtfs-realtime-bindings <https://github.com/google/gtfs-realtime-bindings/tree/master/python>`_, as well as JSON feed files
+- Finally handled Protocol Buffer feed files, thanks to version 0.0.5 of `the Python gtfs-realtime-bindings <https://github.com/google/gtfs-realtime-bindings/tree/master/python>`_
 - Switched to using Google FeedMessage objects natively
+- Simplified code
 
 
 4.0.0, 2016-07-13
