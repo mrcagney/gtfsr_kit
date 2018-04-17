@@ -1,16 +1,13 @@
-GTFSrTK is a Python 3.4+ toolkit designed to process General Transit Feed Specification Realtime (GTFSr) data.
-It uses Pandas to do the heavy lifting.
+GTFSRTK is a tiny Python 3.5+ toolkit to process `General Transit Feed Specification Realtime (GTFSR) data <https://developers.google.com/transit/gtfs-realtime/reference>`_.
+It does some simple things like read and write Protocol Buffer or JSON feed files.
+It also does some complex things like extract and combine delays into DataFrames using Pandas.
 
 
 Installation
 ============
-Create a Python 3.4+ virtual environment and ``pip install gtfsrtk``
+Do ``pipenv install gtfsrtk``.
 
 
 Examples
 ========
-You can play with ``ipynb/examples.ipynb`` in a Jupyter notebook
-
-Conventions
-============
-- Unless specified otherwise, assume all GTFSr feeds are in the form of Python dictionaries
+See the Jupyter notebook at ``ipynb/examples.ipynb``.

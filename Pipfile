@@ -1,0 +1,18 @@
+[[source]]
+verify_ssl = true
+url = "https://pypi.python.org/simple"
+name = "pypi"
+
+[packages]
+gtfs-realtime-bindings = "*"
+pandas = "*"
+gtfstk = "*"
+
+[dev-packages]
+jupyter = "*"
+pytest = "*"
+sphinx = "*"
+twine = "*"
+
+[requires]
+python_version = "3.5"
