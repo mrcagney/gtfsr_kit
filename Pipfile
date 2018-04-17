@@ -13,6 +13,7 @@ jupyter = "*"
 pytest = "*"
 sphinx = "*"
 twine = "*"
+setuptools = "*"
 
 [requires]
 python_version = "3.5"
