@@ -1,17 +1,18 @@
 GTFSRTK
 ********
-A Python 3.4+ toolkit to process General Transit Feed Specification Realtime (GTFSR) data.
-Uses Pandas to do the heavy lifting.
+GTFSRTK is a tiny Python 3.5+ toolkit to process `General Transit Feed Specification Realtime (GTFSR) data <https://developers.google.com/transit/gtfs-realtime/reference>`_.
+It does some simple things like read and write Protocol Buffer or JSON feed files.
+It also does some complex things like extract and combine delays into DataFrames using Pandas.
 
 
 Installation
 ============
-Create a Python 3.4+ virtual environment and ``pip install gtfsrtk``
+Do ``pipenv install gtfsrtk``.
 
 
 Examples
 ========
-You can play with ``ipynb/examples.ipynb`` in a Jupyter notebook
+See the Jupyter notebook at ``ipynb/examples.ipynb``.
 
 
 Documentation
@@ -23,7 +24,6 @@ Notes
 ======
 - Development status is Alpha
 - This project uses `semantic versioning <http://semver.org/>`_
-- Only works on GTFSR feeds that are available in JSON format. I'll incorporate the protobuf format once `the Python 3 binding for protobuf gets fixed <https://github.com/google/gtfs-realtime-bindings/issues/17>`_.
 - Thanks to `MRCagney <http://www.mrcagney.com/>`_ for funding this project
 
 
@@ -35,10 +35,11 @@ Authors
 Changelog
 ==========
 
-
-5.0.0, ?
+5.0.0, 2018-04-17
 ------------------
-- Removed ``main.collect_feeds``, because it was inelegant
+- Simplified code
+- Now finally handles Protocol Buffer feed files (thanks to version 0.0.5 of `the Python gtfs-realtime-bindings <https://github.com/google/gtfs-realtime-bindings/tree/master/python>`_, as well as JSON feed files
+- Switched to using Google FeedMessage objects natively
 
 
 4.0.0, 2016-07-13

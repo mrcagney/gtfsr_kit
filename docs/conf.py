@@ -20,6 +20,9 @@
 import os
 import sys
 sys.path.insert(0, os.path.abspath('../'))
+
+import gtfsrtk
+
 # -- General configuration ------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
@@ -60,7 +63,7 @@ author = 'Alex Raichev'
 # built documents.
 #
 # The short X.Y version.
-version = '4.0'
+version = gtfsrtk.__version__
 # The full version, including alpha/beta/rc tags.
 #release = '2.0.0'
 

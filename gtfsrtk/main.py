@@ -13,7 +13,7 @@ from google.transit import gtfs_realtime_pb2
 import gtfstk as gt
 
 
-TIMESTAMP_FORMAT = '%Y%m%d%H%M%S'
+DATETIME_FORMAT = '%Y-%m-%dT%H:%M:%S'
 
 def read_gtfsr(path, *, from_json=False):
     """
@@ -49,47 +49,46 @@ def write_gtfsr(feed, path, *, to_json=False):
         with path.open('wb') as tgt:
             tgt.write(feed.SerializeToString())
 
-def to_dict(feed):
+def dictify(feed):
     """
     Convert the given GTFSR feed (FeedMessage instance) to a dictionary.
     """
     return json.loads(json_format.MessageToJson(feed))
 
-def timestamp_to_str(t, format=TIMESTAMP_FORMAT, *, inverse=False):
+def timestamp_to_str(t, datetime_format=DATETIME_FORMAT, *, inverse=False):
     """
-    Given a POSIX timestamp (int) ``t``, format it as a datetime string
-    in the given format.
+    Given a POSIX timestamp (integer) ``t``,
+    format it as a datetime string in the given format.
     If ``inverse``, then do the inverse, that is, assume ``t`` is
     a datetime string in the given format and return its corresponding
     timestamp.
-    If ``format is None``, then cast ``t`` as an int
-    (if not ``inverse``) or string (if ``inverse``) directly.
+    If ``format is None``, then return ``t`` as a string
+    (if not ``inverse``) or as an integer (if ``inverse``) directly.
     """
     if not inverse:
-        if format is None:
+        if datetime_format is None:
             result = str(t)
         else:
-            result = dt.datetime.fromtimestamp(t).strftime(format)
+            result = dt.datetime.fromtimestamp(t).strftime(datetime_format)
     else:
         if format is None:
             result = int(t)
         else:
-            result = dt.datetime.strptime(t, format).timestamp()
+            result = dt.datetime.strptime(t, datetime_format).timestamp()
     return result
 
-def get_timestamp(feed, timestamp_format=TIMESTAMP_FORMAT):
+def get_timestamp_str(feed, datetime_format=DATETIME_FORMAT):
     """
     Given a GTFSR feed (FeedMessage instance), return the timestamp
     of the feed as a date string in the given format.
     Note that an empty feed has an (unformatted) timestamp of 0.
     """
-    return timestamp_to_str(feed.header.timestamp, timestamp_format)
+    return timestamp_to_str(feed.header.timestamp, datetime_format)
 
-def extract_delays(feed, timestamp_format=TIMESTAMP_FORMAT):
+def extract_delays(feed):
     """
-    Given a GTFSR feed (FeedMessage instance) and a timestamp format,
-    extract the delays from the feed and return a DataFrame
-    with feed with the columns:
+    Given a GTFSR feed (FeedMessage instance), extract the delays from
+    the feed and return a DataFrame with the columns:
 
     - route_id
     - trip_id
@@ -101,25 +100,24 @@ def extract_delays(feed, timestamp_format=TIMESTAMP_FORMAT):
     If the feed has no trip updates, then return an empty DataFrame.
     """
     rows = []
-    if isinstance(feed, gtfs_realtime_pb2.FeedMessage):
-        for e in feed.entity:
-            if not e.HasField('trip_update'):
-                continue
-            tu = e.trip_update
-            rid = tu.trip.route_id
-            tid = tu.trip.trip_id
-            stu = tu.stop_time_update
-            for x in stu:
-                stop_sequence = int(x.stop_sequence)
-                stop_id = str(x.stop_id)
-                delay = {}
-                for key in ['arrival', 'departure']:
-                    if x.HasField(key):
-                        delay[key] = getattr(x, key).delay
-                    else:
-                        delay[key] = np.nan
-                rows.append((rid, tid, stop_sequence, stop_id,
-                  delay['arrival'], delay['departure']))
+    for e in feed.entity:
+        if not e.HasField('trip_update'):
+            continue
+        tu = e.trip_update
+        rid = tu.trip.route_id
+        tid = tu.trip.trip_id
+        stu = tu.stop_time_update
+        for x in stu:
+            stop_sequence = int(x.stop_sequence)
+            stop_id = str(x.stop_id)
+            delay = {}
+            for key in ['arrival', 'departure']:
+                if x.HasField(key):
+                    delay[key] = getattr(x, key).delay
+                else:
+                    delay[key] = np.nan
+            rows.append((rid, tid, stop_sequence, stop_id,
+              delay['arrival'], delay['departure']))
 
     f = pd.DataFrame(rows, columns=[
       'route_id', 'trip_id', 'stop_sequence', 'stop_id',
@@ -177,25 +175,19 @@ def combine_delays(delays_list):
 
 def build_augmented_stop_times(gtfsr_feeds, gtfs_feed, date):
     """
-    INPUTS:
-
-    - ``gtfsr_feeds``: list; GTFSR feeds
-    - ``gtfs_feed``: GTFSTK Feed instance corresponding to the GTFSR feeds
-    - ``date``: YYYYMMDD string
-    - ``timestamp_format``: string or ``None``
-
-    OUTPUT:
-
-    - A data frame of GTFS stop times for trips scheduled on the given date
-      and containing two extra columns, ``'arrival_delay'`` and
-      ``'departure_delay'``, which are delay values in seconds
-      for that stop time according to the GTFSR feeds given.
-
+    Given a list of GTFSR feeds (FeedMessage instances), a GTFS feed
+    (GTFSTK Feed instance), and a date (YYYYMMDD string), return
+    a DataFrame of GTFS stop times for trips scheduled on the given date
+    and containing two extra columns, ``'arrival_delay'`` and
+    ``'departure_delay'``, which are delay values in seconds
+    for that stop time according to the GTFSR feeds given.
     """
     # Get scheduled stop times for date
     st = gt.get_stop_times(gtfs_feed, date)
 
-    # Get GTFSR timestamps pertinent to date
+    # Get GTFSR timestamps pertinent to date.
+    # Use datetime format YYYYMMDDHHMMSS to be compatible with GTFS dates
+    datetime_format = '%Y%m%d%H%M%S'
     start_time = '000000'
     start_datetime = date + start_time
     # Plus 20 minutes fuzz:
@@ -211,7 +203,8 @@ def build_augmented_stop_times(gtfsr_feeds, gtfs_feed, date):
 
     # Extract delays
     delays_frames = [extract_delays(f) for f in gtfsr_feeds
-      if start_datetime <= get_timestamp(f) <= end_datetime]
+      if start_datetime <= get_timestamp_str(f, datetime_format)
+      <= end_datetime]
 
     # Combine delays
     delays = combine_delays(delays_frames)
@@ -226,21 +219,17 @@ def build_augmented_stop_times(gtfsr_feeds, gtfs_feed, date):
 def interpolate_delays(augmented_stop_times, dist_threshold,
   delay_threshold=3600):
     """
-    INPUTS:
+    Given an augment stop times DataFrame as output by the function
+    :func:`build_augmented_stop_times`, a distance threshold (float)
+    in the same units as the ``'shape_dist_traveled'`` column of
+    ``augmented_stop_times``, if that column is present, and a delay
+    threshold (integer number of seconds), alter the delay values
+    of the augmented stop times as follows.
 
-    - ``augmented_stop_times``: data frame; same format as output of
-      :func:`build_augmented_stop_times`
-    - ``dist_threshold``: float; a distance in the same units
-      as the ``'shape_dist_traveled'`` column of ``augmented_stop_times``,
-      if that column is present
-    - ``delay_threshold``: integer; number of seconds
-
-    OUTPUT:
-
-    The data frame ``augmented_stop_times`` with delays altered as follows.
-    Drop all delays with absolute value more than ``delay_threshold`` seconds.
-    For each trip and for each delay type (arrival delay or departure delay)
-    do the following.
+    Drop all delays with absolute value more than ``delay_threshold``
+    seconds.
+    For each trip and for each delay type (arrival delay or departure
+    delay) do the following.
     If the trip has all null values for the delay type,
     then leave the values as is.
     Otherwise:
@@ -252,6 +241,8 @@ def interpolate_delays(augmented_stop_times, dist_threshold,
       the last stop, then set the last stop delay to zero (charitably);
       otherwise set the last stop delay to the last delay.
     - Linearly interpolate the remaining stop delays by distance.
+
+    Return the resulting DataFrame.
     """
     f = augmented_stop_times.copy()
 

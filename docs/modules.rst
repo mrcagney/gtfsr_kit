@@ -1,12 +1,3 @@
-utilities Module 
-===========================
-
-.. automodule:: gtfsrtk.utilities
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-
 main Module
 ===========================
 

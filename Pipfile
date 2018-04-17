@@ -5,13 +5,14 @@ name = "pypi"
 
 [packages]
 gtfs-realtime-bindings = "*"
-
-[dev-packages]
 pandas = "*"
 gtfstk = "*"
-requests = "*"
+
+[dev-packages]
 jupyter = "*"
 pytest = "*"
+sphinx = "*"
+twine = "*"
 
 [requires]
 python_version = "3.5"

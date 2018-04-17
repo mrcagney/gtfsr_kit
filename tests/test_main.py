@@ -35,14 +35,14 @@ def test_write_gtfsr():
 
         path2.unlink()
 
-def test_to_dict():
-    d = to_dict(feed)
+def test_dictify():
+    d = dictify(feed)
     assert isinstance(d, dict)
     assert set(d.keys()) == {'header', 'entity'}
 
 def test_timestamp_to_str():
     t = 69
-    for format in [None, TIMESTAMP_FORMAT]:
+    for format in [None, '%Y%m%d%H%M%S']:
         s = timestamp_to_str(t)
         # Should be a string
         assert isinstance(s, str)
@@ -50,9 +50,9 @@ def test_timestamp_to_str():
         tt = timestamp_to_str(s, inverse=True)
         assert t == tt
 
-def test_get_timestamp():
+def test_get_timestamp_str():
     for f in [FeedMessage(), feed]:
-        assert isinstance(get_timestamp(f), str)
+        assert isinstance(get_timestamp_str(f), str)
 
 def test_extract_delays():
     for f in [FeedMessage(), feed]:
