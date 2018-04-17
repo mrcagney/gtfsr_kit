@@ -1,5 +1,3 @@
-import shutil
-
 import pandas as pd
 from google.transit.gtfs_realtime_pb2 import FeedMessage
 
