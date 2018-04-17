@@ -87,23 +87,25 @@ def test_combine_delays():
     assert pd.DataFrame.equals(f, extract_delays(feed))
 
 def test_build_augmented_stop_times():
-    gtfsr_feeds = [read_gtfsr(path, from_json=True)
+    gtfsr_feeds0 = []
+    gtfsr_feeds1 = [read_gtfsr(path, from_json=True)
       for path in GTFSR_DIR.iterdir()]
     gtfs_feed = gt.read_gtfs(GTFS_PATH, dist_units='km')
 
-    f = build_augmented_stop_times(gtfsr_feeds, gtfs_feed, date)
+    for gtfsr_feeds in [gtfsr_feeds0, gtfsr_feeds1]:
+        f = build_augmented_stop_times(gtfsr_feeds, gtfs_feed, date)
 
-    # Should be a data frame
-    assert isinstance(f, pd.DataFrame)
+        # Should be a data frame
+        assert isinstance(f, pd.DataFrame)
 
-    # Should have the correct columns
-    st = gt.get_stop_times(gtfs_feed, date)
-    expect_cols = st.columns.tolist() + ['arrival_delay',
-      'departure_delay']
-    assert set(f.columns) == set(expect_cols)
+        # Should have the correct columns
+        st = gt.get_stop_times(gtfs_feed, date)
+        expect_cols = st.columns.tolist() + ['arrival_delay',
+          'departure_delay']
+        assert set(f.columns) == set(expect_cols)
 
-    # Should have the correct number of rows
-    assert f.shape[0] == st.shape[0]
+        # Should have the correct number of rows
+        assert f.shape[0] == st.shape[0]
 
 def test_interpolate_delays():
     gtfsr_feeds = [read_gtfsr(path, from_json=True)

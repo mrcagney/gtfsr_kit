@@ -188,6 +188,9 @@ def build_augmented_stop_times(gtfsr_feeds, gtfs_feed, date):
     and containing two extra columns, ``'arrival_delay'`` and
     ``'departure_delay'``, which are delay values in seconds
     for that stop time according to the GTFSR feeds given.
+
+    If no GTFSR feeds are given or if their dates don't alight with
+    the given date, then the resulting delay fields will be all NaN.
     """
     # Get scheduled stop times for date
     st = gt.get_stop_times(gtfs_feed, date)
@@ -215,12 +218,19 @@ def build_augmented_stop_times(gtfsr_feeds, gtfs_feed, date):
 
     # Combine delays
     delays = combine_delays(delays_frames)
-    if 'route_id' in delays.columns:
+    if delays.empty:
+        # Assign NaNs to delays
+        ast = (
+            st
+            .assign(arrival_delay = np.nan)
+            .assign(departure_delay = np.nan)
+        )
+    else:
         del delays['route_id']
 
-    # Merge with stop times
-    ast = st.merge(delays, how='left',
-      on=['trip_id', 'stop_id', 'stop_sequence'])
+        # Merge with stop times
+        ast = st.merge(delays, how='left',
+          on=['trip_id', 'stop_id', 'stop_sequence'])
 
     return ast.sort_values(['trip_id', 'stop_sequence'])
 
