@@ -38,6 +38,11 @@ Authors
 Changelog
 ==========
 
+6.0.2, 2018-04-18
+------------------
+- Handled edge case in ``build_augmented_stop_times`` for real this time!
+
+
 6.0.1, 2018-04-18
 ------------------
 - Handled edge case in ``build_augmented_stop_times``
