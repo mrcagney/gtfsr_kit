@@ -215,7 +215,8 @@ def build_augmented_stop_times(gtfsr_feeds, gtfs_feed, date):
 
     # Combine delays
     delays = combine_delays(delays_frames)
-    del delays['route_id']
+    if 'route_id' in delays.columns:
+        del delays['route_id']
 
     # Merge with stop times
     ast = st.merge(delays, how='left',

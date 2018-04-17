@@ -38,6 +38,11 @@ Authors
 Changelog
 ==========
 
+6.0.1, 2018-04-18
+------------------
+- Handled edge case in ``build_augmented_stop_times``
+
+
 6.0.0, 2018-04-18
 ------------------
 - Renamed function ``dictify`` to ``feed_to_dict`` and added the inverse function ``dict_to_feed``
