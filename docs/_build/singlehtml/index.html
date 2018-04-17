@@ -40,7 +40,7 @@
           <div class="body" role="main">
             
   <div class="section" id="gtfsrtk-version-documentation">
-<h1>GTFSRTK 5.0.0 Documentation<a class="headerlink" href="#gtfsrtk-version-documentation" title="Permalink to this headline">¶</a></h1>
+<h1>GTFSRTK 6.0.0 Documentation<a class="headerlink" href="#gtfsrtk-version-documentation" title="Permalink to this headline">¶</a></h1>
 <div class="toctree-wrapper compound">
 <span id="document-introduction"></span><p>GTFSRTK is a tiny Python 3.5+ toolkit to process <a class="reference external" href="https://developers.google.com/transit/gtfs-realtime/reference">General Transit Feed Specification Realtime (GTFSR) data</a>.
 It does some simple things like read and write Protocol Buffer or JSON feed files.
@@ -83,9 +83,9 @@ the same trips on different days.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="gtfsrtk.main.dictify">
-<code class="descclassname">gtfsrtk.main.</code><code class="descname">dictify</code><span class="sig-paren">(</span><em>feed</em><span class="sig-paren">)</span><a class="headerlink" href="#gtfsrtk.main.dictify" title="Permalink to this definition">¶</a></dt>
-<dd><p>Convert the given GTFSR feed (FeedMessage instance) to a dictionary.</p>
+<dt id="gtfsrtk.main.dict_to_feed">
+<code class="descclassname">gtfsrtk.main.</code><code class="descname">dict_to_feed</code><span class="sig-paren">(</span><em>feed_dict</em><span class="sig-paren">)</span><a class="headerlink" href="#gtfsrtk.main.dict_to_feed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert the given dictionary to a GTFSR feed (FeedMessage instance).</p>
 </dd></dl>
 
 <dl class="function">
@@ -102,6 +102,12 @@ the feed and return a DataFrame with the columns:</p>
 <li>departure_delay</li>
 </ul>
 <p>If the feed has no trip updates, then return an empty DataFrame.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="gtfsrtk.main.feed_to_dict">
+<code class="descclassname">gtfsrtk.main.</code><code class="descname">feed_to_dict</code><span class="sig-paren">(</span><em>feed</em><span class="sig-paren">)</span><a class="headerlink" href="#gtfsrtk.main.feed_to_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert the given GTFSR feed (FeedMessage instance) to a dictionary.</p>
 </dd></dl>
 
 <dl class="function">

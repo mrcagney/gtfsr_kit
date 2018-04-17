@@ -1,6 +1,3 @@
-data/other_feeds
-flake8*
-
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -19,6 +16,7 @@ dist/
 downloads/
 eggs/
 .eggs/
+*.egg-info/
 lib/
 lib64/
 parts/
