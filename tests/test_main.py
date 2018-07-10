@@ -112,20 +112,23 @@ def test_interpolate_delays():
       for path in GTFSR_DIR.iterdir()]
     gtfs_feed = gt.read_gtfs(GTFS_PATH, dist_units='km')
     ast = build_augmented_stop_times(gtfsr_feeds, gtfs_feed, date)
-    f = interpolate_delays(ast, dist_threshold=1)
 
-    # Should be a data frame
-    assert isinstance(f, pd.DataFrame)
+    for delay_cols in [['arrival_delay'],
+      ['arrival_delay', 'departure_delay']]:
+        f = interpolate_delays(ast, dist_threshold=1, delay_cols=delay_cols)
 
-    # Should have the correct columns
-    assert set(f.columns) == set(ast.columns)
+        # Should be a data frame
+        assert isinstance(f, pd.DataFrame)
 
-    # Should have the correct number of rows
-    assert f.shape[0] == ast.shape[0]
+        # Should have the correct columns
+        assert set(f.columns) == set(ast.columns)
 
-    # For each trip, delays should be all nan or filled
-    for __, group in f.groupby('trip_id'):
-        n = group.shape[0]
-        for col in ['arrival_delay', 'departure_delay']:
-            k = group[col].count()
-            assert k == 0 or k == n
+        # Should have the correct number of rows
+        assert f.shape[0] == ast.shape[0]
+
+        # For each trip, delays should be all nan or filled
+        for __, group in f.groupby('trip_id'):
+            n = group.shape[0]
+            for col in delay_cols:
+                k = group[col].count()
+                assert k == 0 or k == n
