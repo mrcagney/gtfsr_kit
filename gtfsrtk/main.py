@@ -235,7 +235,7 @@ def build_augmented_stop_times(gtfsr_feeds, gtfs_feed, date):
     return ast.sort_values(['trip_id', 'stop_sequence'])
 
 def interpolate_delays(augmented_stop_times, dist_threshold,
-  delay_threshold=3600):
+  delay_threshold=3600, delay_cols=None):
     """
     Given an augment stop times DataFrame as output by the function
     :func:`build_augmented_stop_times`, a distance threshold (float)
@@ -253,19 +253,27 @@ def interpolate_delays(augmented_stop_times, dist_threshold,
     Otherwise:
 
     - If the first delay is more than ``dist_threshold`` distance units
-      from the first stop, then set the first stop delay to zero (charitably);
+      from the first stop, then set the first stop delay to zero
+      (charitably);
       otherwise set the first stop delay to the first delay.
-    - If the last delay is more than ``dist_threshold`` distance units from
-      the last stop, then set the last stop delay to zero (charitably);
-      otherwise set the last stop delay to the last delay.
+    - If the last delay is more than ``dist_threshold`` distance units
+      from the last stop, then set the last stop delay to zero
+      (charitably); otherwise set the last stop delay to the last delay.
     - Linearly interpolate the remaining stop delays by distance.
 
     Return the resulting DataFrame.
+
+    If a list of delay column names is given in ``delay_cols``,
+    then alter those columns instead of the ``arrival_delay`` and
+    ``departure_delay`` columns.
+    This is useful if the given stop times have extra delay columns.
     """
     f = augmented_stop_times.copy()
 
+    if delay_cols is None or not set(delay_cols) <= set(f.columns):
+        delay_cols = ['arrival_delay', 'departure_delay']
+
     # Return f if nothing to do
-    delay_cols = ['arrival_delay', 'departure_delay']
     if 'shape_dist_traveled' not in f.columns or\
       not f['shape_dist_traveled'].notnull().any() or\
       all([f[col].count() == f[col].shape[0] for col in delay_cols]):

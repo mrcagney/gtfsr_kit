@@ -40,7 +40,7 @@
           <div class="body" role="main">
             
   <div class="section" id="gtfsrtk-version-documentation">
-<h1>GTFSRTK 6.0.2 Documentation<a class="headerlink" href="#gtfsrtk-version-documentation" title="Permalink to this headline">¶</a></h1>
+<h1>GTFSRTK 6.1.0 Documentation<a class="headerlink" href="#gtfsrtk-version-documentation" title="Permalink to this headline">¶</a></h1>
 <div class="toctree-wrapper compound">
 <span id="document-introduction"></span><p>GTFSRTK is a tiny Python 3.5+ toolkit to process <a class="reference external" href="https://developers.google.com/transit/gtfs-realtime/reference">General Transit Feed Specification Realtime (GTFSR) data</a>.
 It does some simple things like read and write Protocol Buffer or JSON feed files.
@@ -122,7 +122,7 @@ Note that an empty feed has an (unformatted) timestamp of 0.</p>
 
 <dl class="function">
 <dt id="gtfsrtk.main.interpolate_delays">
-<code class="descclassname">gtfsrtk.main.</code><code class="descname">interpolate_delays</code><span class="sig-paren">(</span><em>augmented_stop_times</em>, <em>dist_threshold</em>, <em>delay_threshold=3600</em><span class="sig-paren">)</span><a class="headerlink" href="#gtfsrtk.main.interpolate_delays" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">gtfsrtk.main.</code><code class="descname">interpolate_delays</code><span class="sig-paren">(</span><em>augmented_stop_times</em>, <em>dist_threshold</em>, <em>delay_threshold=3600</em>, <em>delay_cols=None</em><span class="sig-paren">)</span><a class="headerlink" href="#gtfsrtk.main.interpolate_delays" title="Permalink to this definition">¶</a></dt>
 <dd><p>Given an augment stop times DataFrame as output by the function
 <a class="reference internal" href="#gtfsrtk.main.build_augmented_stop_times" title="gtfsrtk.main.build_augmented_stop_times"><code class="xref py py-func docutils literal notranslate"><span class="pre">build_augmented_stop_times()</span></code></a>, a distance threshold (float)
 in the same units as the <code class="docutils literal notranslate"><span class="pre">'shape_dist_traveled'</span></code> column of
@@ -138,14 +138,19 @@ then leave the values as is.
 Otherwise:</p>
 <ul class="simple">
 <li>If the first delay is more than <code class="docutils literal notranslate"><span class="pre">dist_threshold</span></code> distance units
-from the first stop, then set the first stop delay to zero (charitably);
+from the first stop, then set the first stop delay to zero
+(charitably);
 otherwise set the first stop delay to the first delay.</li>
-<li>If the last delay is more than <code class="docutils literal notranslate"><span class="pre">dist_threshold</span></code> distance units from
-the last stop, then set the last stop delay to zero (charitably);
-otherwise set the last stop delay to the last delay.</li>
+<li>If the last delay is more than <code class="docutils literal notranslate"><span class="pre">dist_threshold</span></code> distance units
+from the last stop, then set the last stop delay to zero
+(charitably); otherwise set the last stop delay to the last delay.</li>
 <li>Linearly interpolate the remaining stop delays by distance.</li>
 </ul>
 <p>Return the resulting DataFrame.</p>
+<p>If a list of delay column names is given in <code class="docutils literal notranslate"><span class="pre">delay_cols</span></code>,
+then alter those columns instead of the <code class="docutils literal notranslate"><span class="pre">arrival_delay</span></code> and
+<code class="docutils literal notranslate"><span class="pre">departure_delay</span></code> columns.
+This is useful if the given stop times have extra delay columns.</p>
 </dd></dl>
 
 <dl class="function">
