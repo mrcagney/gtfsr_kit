@@ -1,26 +1,21 @@
-GTFSRTK
-********
-.. image:: https://travis-ci.org/mrcagney/gtfrstk.svg?branch=master
-    :target: https://travis-ci.org/mrcagney/gtfsrtk
+GTFSR Kit
+*********
+.. image:: https://travis-ci.org/mrcagney/gtfrs_kit.svg?branch=master
+    :target: https://travis-ci.org/mrcagney/gtfsr_kit
 
-GTFSRTK is a tiny Python 3.5+ toolkit to process `General Transit Feed Specification Realtime (GTFSR) data <https://developers.google.com/transit/gtfs-realtime/reference>`_.
+GTFSR Kit is a tiny Python 3.8+ library to process `General Transit Feed Specification Realtime (GTFSR) data <https://developers.google.com/transit/gtfs-realtime/reference>`_.
 It does some simple things like read and write Protocol Buffer or JSON feed files.
 It also does some complex things like extract and combine delays into Pandas DataFrames.
 
 
 Installation
 ============
-Do ``pipenv install gtfsrtk``.
+Do ``poetry add gtfsr_kit``.
 
 
 Examples
 ========
-See the Jupyter notebook at ``ipynb/examples.ipynb``.
-
-
-Documentation
-==============
-Documentation is in docs/ and also on RawGit `here <https://rawgit.com/araichev/gtfsrtk/master/docs/_build/singlehtml/index.html>`_.
+See the Jupyter notebook at ``notebooks/examples.ipynb``.
 
 
 Notes
@@ -37,6 +32,13 @@ Authors
 
 Changelog
 ==========
+
+7.0.0, 2020-12-15
+-----------------
+- Upgraded to Python 3.8.
+- Breaking change: renamed some functions.
+- Changed the package name.
+
 
 6.1.0, 2018-07-11
 ------------------
