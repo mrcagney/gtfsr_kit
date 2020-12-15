@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "gtfsr_kit"
-version = "6.2.0"
+version = "7.0.0"
 description = "A Python 3.8+ library to process General Transit Feed Specification Realtime (GTFSR) data"
 authors = ["Alex Raichev <araichev@mrcagney.com>"]
 license = "MIT"
@@ -15,6 +15,7 @@ jupyter = "^1.0.0"
 pytest = "^6.2.0"
 black = "^20.8b1"
 pre-commit = "^2.9.3"
+Sphinx = "^3.3.1"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
