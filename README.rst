@@ -33,6 +33,11 @@ Authors
 Changelog
 ==========
 
+7.0.1, 2022-07-20
+-----------------
+- Updated dependencies, removing all but one version caps, and tested on Python 3.10.
+
+
 7.0.0, 2020-12-15
 -----------------
 - Upgraded to Python 3.8.
